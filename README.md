@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Asistente Ejecutivo Personal
 
-## Getting Started
+Aplicación privada (PWA) que funciona como "segundo cerebro" profesional: agenda inteligente, tareas, seguimientos, correo Outlook, resúmenes diarios, podcast y análisis de productividad, apoyada por Claude API.
 
-First, run the development server:
+> Estado: **Fase 0 — Preparación técnica**. Ver [PROGRESS.md](PROGRESS.md).
+
+## Tecnología
+
+Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · PWA · Supabase (PostgreSQL, Auth, RLS) · Vercel. En fases posteriores: Claude API, n8n, Microsoft Graph, Recharts.
+
+## Requisitos
+
+- Node.js 20.9 o superior (probado con 22.23) y npm 10.
+- Un proyecto de Supabase.
+- PostgreSQL 15+ local solo si quieres ejecutar las pruebas de base de datos (`npm run db:test`).
+
+## Puesta en marcha (desarrollo)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local      # completa los valores de Supabase y ALLOWED_EMAILS
+npm run dev                      # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Vista previa de la interfaz sin Supabase (solo en desarrollo):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+UI_PREVIEW=1 npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Base de datos
 
-## Learn More
+1. En Supabase → SQL Editor, ejecuta el contenido de `supabase/migrations/20261103000001_initial_schema.sql`.
+   (O con la CLI: `npx supabase link --project-ref <ref>` y `npx supabase db push`.)
+2. En Authentication → Sign In / Providers: deja activo **Email**, desactiva **Allow new users to sign up**.
+3. En Authentication → Users → **Invite user**: invita tu correo (el mismo de `ALLOWED_EMAILS`).
+4. En Authentication → URL Configuration: `Site URL` = URL de la app y agrega `<URL>/auth/callback` en Redirect URLs.
 
-To learn more about Next.js, take a look at the following resources:
+Detalle del modelo: [DATABASE.md](DATABASE.md).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Comando | Qué hace |
+|---|---|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` / `npm start` | Build y servidor de producción |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | Verificación de tipos |
+| `npm test` | Pruebas unitarias (Vitest) |
+| `npm run db:test` | Aplica las migraciones en un Postgres local desechable y prueba RLS |
+| `npm run check` | lint + tipos + pruebas + build |
+| `npm run icons` | Regenera los iconos de la PWA (requiere Playwright) |
 
-## Deploy on Vercel
+## Estructura
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+  app/
+    (app)/            Pantallas privadas con menú (Inicio, Agenda, … Configuración)
+    login/            Inicio de sesión por enlace mágico
+    auth/             callback (enlace mágico) y signout
+    dispositivo/      Pantalla de dispositivo pendiente / revocado
+    offline/          Pantalla sin conexión (PWA)
+    api/health/       Estado de la app
+    manifest.ts       Manifest de la PWA
+  components/         Componentes de interfaz
+  lib/                env, supabase, dispositivos, fechas, sesión, navegación
+  middleware.ts       Sesión + dispositivo autorizado en cada petición
+public/               sw.js (service worker) e iconos
+supabase/migrations/  Esquema SQL versionado
+supabase/tests/       Pruebas de RLS
+tests/                Pruebas unitarias
+docs/capturas/        Capturas de la interfaz
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Documentación
+
+[ARCHITECTURE.md](ARCHITECTURE.md) · [DATABASE.md](DATABASE.md) · [SECURITY.md](SECURITY.md) · [CHANGELOG.md](CHANGELOG.md) · [PROGRESS.md](PROGRESS.md)
