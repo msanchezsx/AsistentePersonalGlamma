@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar]
 
+### Agregado (Fase 1.1 — Tareas)
+- Pantalla Tareas: grupos Vencidas, Hoy, Mañana, Próximas, Sin fecha y Cerradas (14 días).
+- Crear, editar, completar (confirmado por el usuario), poner en proceso/espera, cancelar, reabrir y eliminar tareas.
+- Fecha límite con o sin hora ("todo el día"), prioridad 1–5, urgente/importante, proyecto y cliente.
+- Inicio: tarjeta "Tareas prioritarias" con datos reales y acceso rápido a "Nueva tarea".
+- Migración `20261103000002_tasks_all_day.sql` (columna `tasks.due_all_day`).
+- Conversión hora local ↔ UTC sin dependencias (`src/lib/zoned-time.ts`).
+
 ### Cambiado
 - Se acepta `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (nombre actual de Supabase) además de `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 

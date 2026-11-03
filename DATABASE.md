@@ -1,6 +1,11 @@
 # Base de datos
 
-PostgreSQL en Supabase. Migración inicial: `supabase/migrations/20261103000001_initial_schema.sql`.
+PostgreSQL en Supabase. Migraciones en `supabase/migrations/` (se aplican en orden):
+
+| Archivo | Contenido |
+|---|---|
+| `20261103000001_initial_schema.sql` | Esquema inicial (Fase 0) |
+| `20261103000002_tasks_all_day.sql` | `tasks.due_all_day`: fecha límite sin hora (Fase 1.1) |
 
 ## Convenciones
 
@@ -25,7 +30,7 @@ PostgreSQL en Supabase. Migración inicial: `supabase/migrations/20261103000001_
 | Proyectos | `projects` | `code` para número de pedido (p. ej. 103050). |
 | Recurrencias | `recurrence_rules` | RRULE (RFC 5545) + zona horaria. |
 | Reuniones | `meetings`, `meeting_participants` | `draft` hasta confirmar; `external_provider/id` únicos para sincronizar calendario sin duplicar. |
-| Tareas | `tasks` | Prioridad 1–5, urgente/importante (Eisenhower), `completion_confirmed`, `source`. `done` ⇔ `completed_at`. |
+| Tareas | `tasks` | `due_all_day` = fecha sin hora (se guarda 23:59:59 local). Prioridad 1–5, urgente/importante (Eisenhower), `completion_confirmed`, `source`. `done` ⇔ `completed_at`. |
 | Comunicaciones | `communications` | Supertipo: correo, WhatsApp compartido, llamada, nota. Solo resumen, no cuerpo completo. |
 | Correos | `emails` | Extensión 1:1 de `communications` con datos de Graph; `graph_message_id` único por usuario. |
 | Seguimientos / compromisos | `follow_ups` | `kind` follow_up/commitment; `owner_side` mine/theirs; ligado a tarea, reunión, comunicación, cliente o proyecto. |

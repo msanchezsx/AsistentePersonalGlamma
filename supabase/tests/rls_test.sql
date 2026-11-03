@@ -172,4 +172,18 @@ select pg_temp.check((select count(*) from public.audit_log where action like 'd
 delete from auth.users where id = '22222222-2222-2222-2222-222222222222';
 select pg_temp.check((select count(*) from public.profiles) = 1, 'al borrar el usuario se borran sus datos');
 
+-- 12. Fase 1.1: tareas de todo el día
+select pg_temp.as_user('11111111-1111-1111-1111-111111111111');
+insert into public.tasks (user_id, title, due_at, due_all_day)
+values ('11111111-1111-1111-1111-111111111111', 'todo el día', now(), true);
+select pg_temp.check((select count(*) from public.tasks where due_all_day) = 1, 'se guarda una tarea de todo el día');
+do $$ begin
+  insert into public.tasks (user_id, title, due_all_day) values ('11111111-1111-1111-1111-111111111111', 'x', true);
+  raise exception 'FALLÓ: todo el día sin fecha';
+exception when check_violation then raise notice 'OK: una tarea de todo el día requiere fecha';
+end $$;
+update public.tasks set status = 'done', completed_at = now(), completion_confirmed = true where title = 'todo el día';
+select pg_temp.check((select completion_confirmed from public.tasks where title = 'todo el día'), 'completar una tarea queda confirmado');
+reset role;
+
 \echo 'TODAS LAS PRUEBAS DE BASE DE DATOS PASARON'

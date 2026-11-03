@@ -3,7 +3,7 @@
 | Fase | Estado |
 |---|---|
 | 0. Preparación técnica | 🟢 Desplegada en producción; pendiente prueba de autorización del celular |
-| 1. Agenda inteligente | ⏸ Espera aprobación de la Fase 0 |
+| 1. Agenda inteligente | 🟡 En curso (aprobada 2026-11-03) |
 | 2. Inteligencia artificial | ⏸ |
 | 3. Outlook | ⏸ |
 | 4. Automatizaciones | ⏸ |
@@ -62,6 +62,19 @@ El desarrollo se ejecuta en un contenedor en la nube de Claude Code (no en la co
 
 Guía paso a paso para el usuario: [docs/GUIA-SUPABASE-VERCEL.md](docs/GUIA-SUPABASE-VERCEL.md).
 
+## Fase 1 — Actividades
+
+| # | Actividad | Estado | Validación |
+|---|---|---|---|
+| 1.1 | Tareas (CRUD, estados, prioridad, urgente/importante, fecha con/sin hora) | 🟡 Publicada, falta prueba del usuario | 31 pruebas unitarias, 36 comprobaciones SQL, build OK, capturas sin errores |
+| 1.2 | Reuniones y recordatorios | ⏸ | |
+| 1.3 | Recurrencias | ⏸ | |
+| 1.4 | Vistas diaria y semanal | ⏸ | |
+| 1.5 | Registro por texto y voz | ⏸ | |
+| 1.6 | Sincronización entre dispositivos | ⏸ | |
+
+Nota: no hay acceso de red desde el entorno de desarrollo a Supabase, por lo que las consultas reales se validan en producción por el usuario.
+
 ## Siguiente actividad
 
-Al aprobar la Fase 0: **Fase 1 — Agenda inteligente**, empezando por el CRUD de tareas.
+1.2 Reuniones y recordatorios, tras validar 1.1.
