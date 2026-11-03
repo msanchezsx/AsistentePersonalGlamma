@@ -161,7 +161,7 @@ async function UpcomingMeetings({ preview, timeZone, now }: { preview: boolean; 
     <Card>
       <div className="mb-1 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Próximas reuniones</h2>
-        <Link href="/agenda" className="text-sm font-medium text-accent">
+        <Link href="/agenda?vista=dia" className="text-sm font-medium text-accent">
           Ver agenda
         </Link>
       </div>

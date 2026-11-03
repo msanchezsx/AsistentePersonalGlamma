@@ -39,3 +39,17 @@ export async function getMeeting(id: string): Promise<Meeting | null> {
   const { data } = await supabase.from("meetings").select(MEETING_SELECT).eq("id", id).maybeSingle();
   return (data as unknown as Meeting | null) ?? null;
 }
+
+/** Reuniones que empiezan dentro del rango UTC [from, to). */
+export async function listMeetingsInRange(from: string, to: string) {
+  await ensureSeries();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("meetings")
+    .select(MEETING_SELECT)
+    .gte("starts_at", from)
+    .lt("starts_at", to)
+    .order("starts_at")
+    .limit(500);
+  return { meetings: (data as unknown as Meeting[] | null) ?? [], error: Boolean(error) };
+}

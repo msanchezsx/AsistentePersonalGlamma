@@ -4,6 +4,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar]
 
+### Agregado (Fase 1.4 — Vistas diaria y semanal)
+- Agenda con tres vistas: **Día**, **Semana** y **Próximas** (la lista anterior), con navegación anterior/siguiente y botón "Hoy".
+- Día: tareas sin hora del día, horario con reuniones y tareas en orden, marca "Ahora", tareas vencidas (hoy) y tiempo libre dentro de la jornada 9:00–17:00.
+- Semana: lunes a domingo (columnas en tablet horizontal, apilado en celular), minutos en reuniones por día y fines de semana marcados como descanso según `user_preferences.work_days`.
+- Inicio → "Ver agenda" abre la vista Día.
+- Lógica pura y probada en `src/lib/planner.ts`.
+
 ### Cambiado (ajustes pedidos por el usuario)
 - La app se llama ahora "Asistente" (menú, inicio de sesión, título y manifest).
 - Nuevo icono y logo: caja de cartón. Iconos regenerados con `scripts/generate-icons.mjs` con nombre nuevo (`/icons/caja-*.png`) para que Android detecte el cambio; caché del service worker en `v4`.

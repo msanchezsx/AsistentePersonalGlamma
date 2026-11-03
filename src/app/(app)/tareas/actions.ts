@@ -28,6 +28,7 @@ function reminderTarget(v: TaskFormValues, due: { due_at: string | null; due_all
 
 function revalidateTaskViews() {
   revalidatePath("/tareas");
+  revalidatePath("/agenda");
   revalidatePath("/");
 }
 

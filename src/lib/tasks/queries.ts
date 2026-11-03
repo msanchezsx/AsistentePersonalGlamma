@@ -19,6 +19,19 @@ export async function listTasks(): Promise<{ tasks: Task[]; error: boolean }> {
   return { tasks: (data as unknown as Task[] | null) ?? [], error: Boolean(error) };
 }
 
+/** Tareas con fecha límite dentro del rango UTC [from, to). */
+export async function listTasksDueInRange(from: string, to: string): Promise<{ tasks: Task[]; error: boolean }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tasks")
+    .select(TASK_SELECT)
+    .gte("due_at", from)
+    .lt("due_at", to)
+    .order("due_at")
+    .limit(500);
+  return { tasks: (data as unknown as Task[] | null) ?? [], error: Boolean(error) };
+}
+
 export async function getTask(id: string): Promise<Task | null> {
   const supabase = await createClient();
   const { data } = await supabase.from("tasks").select(TASK_SELECT).eq("id", id).maybeSingle();
