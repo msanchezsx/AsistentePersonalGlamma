@@ -30,7 +30,7 @@ UI_PREVIEW=1 npm run dev
 
 ## Base de datos
 
-1. En Supabase → SQL Editor, ejecuta el contenido de `supabase/migrations/20261103000001_initial_schema.sql`.
+1. En Supabase → SQL Editor, ejecuta el contenido de `supabase/migrations/20261103000001_initial_schema.sql` (guía detallada: [docs/GUIA-SUPABASE-VERCEL.md](docs/GUIA-SUPABASE-VERCEL.md)).
    (O con la CLI: `npx supabase link --project-ref <ref>` y `npx supabase db push`.)
 2. En Authentication → Sign In / Providers: deja activo **Email**, desactiva **Allow new users to sign up**.
 3. En Authentication → Users → **Invite user**: invita tu correo (el mismo de `ALLOWED_EMAILS`).

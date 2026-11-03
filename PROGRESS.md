@@ -42,7 +42,7 @@ El desarrollo se ejecuta en un contenedor en la nube de Claude Code (no en la co
 | 0.8 | Interfaz base | ✅ | Capturas en `docs/capturas/` (celular y tablet), sin errores de consola |
 | 0.9 | PWA | ✅ código / ⏳ instalación | Manifest y `sw.js` servidos correctamente; instalación en Android se prueba tras desplegar |
 | 0.10 | Documentación | ✅ | Este archivo y los demás `.md` |
-| 0.11 | Crear repositorio GitHub | ⏳ | Requiere que el usuario cree `msanchezsx/asistente-ejecutivo` (privado) |
+| 0.11 | Crear repositorio GitHub | ✅ | `msanchezsx/AsistentePersonalGlamma`, código subido a `main` |
 | 0.12 | Crear proyecto Supabase y aplicar migración | ⏳ | Requiere al usuario |
 | 0.13 | Desplegar en Vercel | ⏳ | Requiere al usuario (conectar repo y variables) |
 
@@ -53,10 +53,12 @@ El desarrollo se ejecuta en un contenedor en la nube de Claude Code (no en la co
 
 ## Pendientes para cerrar la Fase 0
 
-1. Repositorio GitHub → push del código.
+1. ~~Repositorio GitHub~~ ✅
 2. Proyecto Supabase → aplicar migración, desactivar registros, invitar el correo del usuario, configurar URLs.
 3. Proyecto Vercel → variables de entorno → despliegue.
 4. Prueba integral: login desde el celular (se activa), login desde la tablet (queda pendiente), aprobar desde el celular, revocar y volver a aprobar, instalar la PWA en ambos.
+
+Guía paso a paso para el usuario: [docs/GUIA-SUPABASE-VERCEL.md](docs/GUIA-SUPABASE-VERCEL.md).
 
 ## Siguiente actividad
 
