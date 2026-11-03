@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import type { Option } from "@/lib/tasks/types";
 import { PRIORITY_LABELS } from "@/lib/tasks/labels";
+import { REMINDER_OPTIONS } from "@/lib/reminders";
 import type { TaskFormState } from "./actions";
 
 export type TaskFormDefaults = {
@@ -17,6 +18,7 @@ export type TaskFormDefaults = {
   due_time: string;
   project_id: string;
   client_id: string;
+  reminder: string;
 };
 
 const inputCls =
@@ -74,6 +76,19 @@ export function TaskForm({
           <input id="due_time" name="due_time" type="time" defaultValue={defaults.due_time} className={inputCls} />
         </Field>
       </div>
+
+      <Field label="Recordatorio" error={err.reminder} htmlFor="reminder">
+        <select id="reminder" name="reminder" defaultValue={defaults.reminder} className={inputCls}>
+          {REMINDER_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-muted">
+          Se calcula sobre la hora límite (o a las 9:00 si la tarea no tiene hora). Requiere fecha límite.
+        </p>
+      </Field>
 
       <Field label="Prioridad" error={err.priority} htmlFor="priority">
         <select id="priority" name="priority" defaultValue={String(defaults.priority)} className={inputCls}>

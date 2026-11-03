@@ -30,6 +30,7 @@ export default async function NewTaskPage() {
             due_time: "",
             project_id: "",
             client_id: "",
+            reminder: "",
           }}
         />
       </Card>

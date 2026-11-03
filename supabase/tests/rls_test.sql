@@ -186,4 +186,42 @@ update public.tasks set status = 'done', completed_at = now(), completion_confir
 select pg_temp.check((select completion_confirmed from public.tasks where title = 'todo el día'), 'completar una tarea queda confirmado');
 reset role;
 
+-- 13. Fase 1.2: reuniones, participantes y recordatorios
+select pg_temp.as_user('11111111-1111-1111-1111-111111111111');
+insert into public.meetings (id, user_id, title, starts_at, ends_at, status, source, confirmed_at)
+values ('aaaaaaaa-0000-0000-0000-000000000010', '11111111-1111-1111-1111-111111111111', 'Revisión pedido',
+        now() + interval '1 day', now() + interval '1 day 1 hour', 'scheduled', 'manual', now());
+insert into public.meeting_participants (user_id, meeting_id, display_name)
+values ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000010', 'Mi jefe');
+insert into public.reminders (user_id, meeting_id, title, remind_at)
+values ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000010', 'Revisión pedido',
+        now() + interval '23 hours 45 minutes');
+select pg_temp.check((select count(*) from public.reminders where status = 'scheduled') = 1, 'se programa el recordatorio de la reunión');
+update public.reminders set status = 'cancelled' where meeting_id = 'aaaaaaaa-0000-0000-0000-000000000010';
+select pg_temp.check((select status from public.reminders limit 1) = 'cancelled', 'el usuario puede cancelar su recordatorio');
+delete from public.meeting_participants where meeting_id = 'aaaaaaaa-0000-0000-0000-000000000010' and contact_id is null;
+select pg_temp.check((select count(*) from public.meeting_participants) = 0, 'se reemplazan los participantes escritos');
+reset role;
+-- B (recreado) no puede colgar recordatorios ni participantes de reuniones de A
+insert into auth.users (id, email) values ('33333333-3333-3333-3333-333333333333', 'usuario.c@example.com');
+select pg_temp.as_user('33333333-3333-3333-3333-333333333333');
+do $$ begin
+  insert into public.reminders (user_id, meeting_id, title, remind_at)
+  values ('33333333-3333-3333-3333-333333333333', 'aaaaaaaa-0000-0000-0000-000000000010', 'x', now());
+  raise exception 'FALLÓ: recordatorio sobre reunión ajena';
+exception when foreign_key_violation then raise notice 'OK: no se pueden crear recordatorios sobre reuniones ajenas';
+end $$;
+do $$ begin
+  insert into public.meeting_participants (user_id, meeting_id, display_name)
+  values ('33333333-3333-3333-3333-333333333333', 'aaaaaaaa-0000-0000-0000-000000000010', 'intruso');
+  raise exception 'FALLÓ: participante en reunión ajena';
+exception when foreign_key_violation then raise notice 'OK: no se pueden agregar participantes a reuniones ajenas';
+end $$;
+reset role;
+select pg_temp.as_user('11111111-1111-1111-1111-111111111111');
+delete from public.meetings where id = 'aaaaaaaa-0000-0000-0000-000000000010';
+select pg_temp.check((select count(*) from public.reminders where meeting_id = 'aaaaaaaa-0000-0000-0000-000000000010') = 0,
+                     'al borrar la reunión se borran sus recordatorios');
+reset role;
+
 \echo 'TODAS LAS PRUEBAS DE BASE DE DATOS PASARON'

@@ -7,6 +7,9 @@ import { getViewer } from "@/lib/session";
 import { groupTasks, type Task } from "@/lib/tasks/model";
 import { listTasks } from "@/lib/tasks/queries";
 import { TaskItem } from "./tareas/task-item";
+import { MeetingItem } from "./agenda/meeting-item";
+import { isActiveMeeting, type Meeting } from "@/lib/meetings/model";
+import { listMeetings } from "@/lib/meetings/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +19,6 @@ const SECTIONS = [
     phase: 4,
     text: "El resumen de inicio de jornada se generará automáticamente a partir de tu agenda, tareas y correos.",
   },
-  { title: "Próximas reuniones", phase: 1, text: "Aquí verás tus próximas reuniones cuando se active la agenda." },
   { title: "Alertas", phase: 4, text: "Actividades vencidas y compromisos próximos a vencer." },
   { title: "Seguimientos", phase: 1, text: "Seguimientos y compromisos abiertos con clientes y colaboradores." },
 ];
@@ -46,7 +48,10 @@ export default async function HomePage() {
         <QuickAction icon="spark" label="Asistente" phase={2} href="/inteligencia" />
       </div>
 
-      <PriorityTasks preview={viewer.preview} timeZone={viewer.timezone} now={now} />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <UpcomingMeetings preview={viewer.preview} timeZone={viewer.timezone} now={now} />
+        <PriorityTasks preview={viewer.preview} timeZone={viewer.timezone} now={now} />
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         {SECTIONS.map((s, i) => (
@@ -134,6 +139,39 @@ async function PriorityTasks({ preview, timeZone, now }: { preview: boolean; tim
             ))}
           </ul>
         </>
+      )}
+    </Card>
+  );
+}
+
+/** Reuniones activas que aún no terminan, de hoy y mañana (máximo 4). */
+async function UpcomingMeetings({ preview, timeZone, now }: { preview: boolean; timeZone: string; now: Date }) {
+  const { meetings, error } = preview
+    ? { meetings: [] as Meeting[], error: false }
+    : await listMeetings({ pastDays: 0, futureDays: 2 });
+  const items = meetings
+    .filter((m) => isActiveMeeting(m) && new Date(m.ends_at) > now)
+    .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
+    .slice(0, 4);
+
+  return (
+    <Card>
+      <div className="mb-1 flex items-center justify-between">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Próximas reuniones</h2>
+        <Link href="/agenda" className="text-sm font-medium text-accent">
+          Ver agenda
+        </Link>
+      </div>
+      {error ? (
+        <EmptyState>No se pudo cargar la agenda.</EmptyState>
+      ) : items.length === 0 ? (
+        <EmptyState>No tienes reuniones pendientes hoy ni mañana.</EmptyState>
+      ) : (
+        <ul className="divide-y divide-border">
+          {items.map((m) => (
+            <MeetingItem key={m.id} meeting={m} now={now} timeZone={timeZone} />
+          ))}
+        </ul>
       )}
     </Card>
   );
