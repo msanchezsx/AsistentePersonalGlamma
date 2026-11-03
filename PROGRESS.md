@@ -68,7 +68,7 @@ Guía paso a paso para el usuario: [docs/GUIA-SUPABASE-VERCEL.md](docs/GUIA-SUPA
 |---|---|---|---|
 | 1.1 | Tareas (CRUD, estados, prioridad, urgente/importante, fecha con/sin hora) | ✅ | Probada por el usuario en la tablet (2026-11-03) |
 | 1.2 | Reuniones y recordatorios | ✅ | Crear reunión probado por el usuario (2026-11-03). Los recordatorios se guardan; el aviso push llega en la Fase 4 |
-| 1.3 | Recurrencias | 🟡 Publicada, falta migración 0003 y prueba del usuario | 56 pruebas unitarias, 51 comprobaciones SQL, build OK |
+| 1.3 | Recurrencias | ✅ Probada por el usuario (2026-11-03) | 56 pruebas unitarias, 51 comprobaciones SQL, build OK |
 | 1.4 | Vistas diaria y semanal | ⏸ | |
 | 1.5 | Registro por texto y voz | ⏸ | |
 | 1.6 | Sincronización entre dispositivos | ⏸ | |
@@ -77,4 +77,4 @@ Nota: no hay acceso de red desde el entorno de desarrollo a Supabase, por lo que
 
 ## Siguiente actividad
 
-1.4 Vistas diaria y semanal, tras validar 1.3 (requiere aplicar la migración 0003 en Supabase).
+1.4 Vistas diaria y semanal (1.3 validada por el usuario 2026-11-03).
