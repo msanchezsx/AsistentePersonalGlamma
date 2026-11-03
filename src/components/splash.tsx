@@ -1,5 +1,3 @@
-import { GlamaLogo } from "@/components/glama-logo";
-
 /**
  * Pantalla de arranque: caja de cartón girando. Solo CSS (sin JavaScript):
  * aparece al abrir la app (carga completa) y se desvanece sola a los ~1.8 s.
@@ -17,10 +15,7 @@ export function Splash() {
           <div className="face bottom" />
         </div>
       </div>
-      <div className="flex flex-col items-center gap-2">
-        <GlamaLogo className="w-24" priority />
-        <p className="splash-title">Asistente</p>
-      </div>
+      <p className="splash-title">Asistente</p>
     </div>
   );
 }

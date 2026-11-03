@@ -18,9 +18,9 @@ mkdirSync("public/icons", { recursive: true });
 const browser = await chromium.launch();
 const page = await browser.newPage({ deviceScaleFactor: 1 });
 for (const [file, size, maskable] of [
-  ["icon-192.png", 192, false],
-  ["icon-512.png", 512, false],
-  ["icon-maskable-512.png", 512, true],
+  ["caja-192.png", 192, false],
+  ["caja-512.png", 512, false],
+  ["caja-maskable-512.png", 512, true],
 ]) {
   await page.setViewportSize({ width: size, height: size });
   await page.setContent(`<style>html,body{margin:0;background:transparent}svg{width:${size}px;height:${size}px;display:block}</style>${svg(maskable)}`);

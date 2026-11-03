@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
   robots: { index: false, follow: false },
   icons: {
-    icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
-    apple: "/icons/icon-192.png",
+    icon: [{ url: "/icons/caja-192.png", sizes: "192x192", type: "image/png" }],
+    apple: "/icons/caja-192.png",
   },
 };
 

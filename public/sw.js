@@ -6,9 +6,9 @@
  *   - Si no hay red al navegar, se muestra /offline.
  * Las notificaciones push se agregan en la Fase 4.
  */
-const VERSION = "v3";
+const VERSION = "v4";
 const STATIC_CACHE = `ae-static-${VERSION}`;
-const PRECACHE = ["/offline", "/icons/icon-192.png", "/icons/icon-512.png"];
+const PRECACHE = ["/offline", "/icons/caja-192.png", "/icons/caja-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(STATIC_CACHE).then((c) => c.addAll(PRECACHE)));
