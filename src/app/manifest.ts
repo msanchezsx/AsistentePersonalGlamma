@@ -3,9 +3,9 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Asistente Ejecutivo Personal",
+    name: "Asistente",
     short_name: "Asistente",
-    description: "Tu asistente ejecutivo personal con inteligencia artificial.",
+    description: "Tu asistente personal con inteligencia artificial.",
     lang: "es-MX",
     start_url: "/",
     scope: "/",

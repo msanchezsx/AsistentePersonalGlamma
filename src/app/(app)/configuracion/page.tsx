@@ -6,6 +6,7 @@ import { formatLongDate } from "@/lib/datetime";
 import { getViewer } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { DeviceActions } from "./device-actions";
+import { NameForm } from "./name-form";
 
 export const metadata: Metadata = { title: "Configuración" };
 export const dynamic = "force-dynamic";
@@ -65,6 +66,9 @@ export default async function ConfigPage() {
               <dd className="font-medium">{viewer.timezone}</dd>
             </div>
           </dl>
+          <div className="mt-4">
+            <NameForm defaultName={viewer.displayName ?? ""} />
+          </div>
         </Card>
 
         <Card title="Jornada laboral">

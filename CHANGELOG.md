@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar]
 
+### Cambiado (ajustes pedidos por el usuario)
+- La app se llama ahora "Asistente" (menú, inicio de sesión, título y manifest).
+- Nuevo icono y logo: caja de cartón. Iconos regenerados con `scripts/generate-icons.mjs`; caché del service worker en `v2`.
+- Configuración → Cuenta: campo "¿Cómo te saludo?" (`profiles.preferred_name`) para el saludo de Inicio.
+
 ### Agregado (Fase 1.3 — Actividades recurrentes)
 - Campo "Repetir" en tareas y reuniones: todos los días, de lunes a viernes, cada semana, cada 2 semanas o cada mes, con fecha final opcional.
 - Tareas: al terminar o cancelar una tarea que se repite se crea la siguiente (nunca en el pasado) con su recordatorio. Botón "Dejar de repetir".

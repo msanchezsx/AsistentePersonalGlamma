@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { isSupabaseConfigured } from "@/lib/env";
 import { LoginForm } from "./login-form";
+import { BoxLogo } from "@/components/box-logo";
 
 export const metadata: Metadata = { title: "Iniciar sesión" };
 export const dynamic = "force-dynamic";
@@ -20,10 +21,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <main className="grid min-h-dvh place-items-center px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <span className="mx-auto mb-4 grid size-14 place-items-center rounded-2xl bg-accent text-xl font-bold text-accent-text">
-            AE
-          </span>
-          <h1 className="text-2xl font-semibold tracking-tight">Asistente Ejecutivo</h1>
+          <BoxLogo className="mx-auto mb-4 size-14" />
+          <h1 className="text-2xl font-semibold tracking-tight">Asistente</h1>
           <p className="mt-1 text-sm text-muted">Acceso privado</p>
         </div>
 

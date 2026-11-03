@@ -52,3 +52,25 @@ export async function revokeDevice(_prev: DeviceActionState, formData: FormData)
   revalidatePath("/configuracion");
   return { ok: true, message: "Dispositivo revocado." };
 }
+
+export type NameActionState = { ok: boolean; message: string } | null;
+
+const nameSchema = z.string().trim().max(60, "Máximo 60 caracteres");
+
+/** Nombre con el que te saluda el asistente (perfil propio; RLS limita a tu fila). */
+export async function updatePreferredName(_prev: NameActionState, formData: FormData): Promise<NameActionState> {
+  const parsed = nameSchema.safeParse(String(formData.get("preferred_name") ?? ""));
+  if (!parsed.success) return { ok: false, message: parsed.error.issues[0].message };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, message: "Tu sesión expiró. Vuelve a entrar." };
+  const { error, count } = await supabase
+    .from("profiles")
+    .update({ preferred_name: parsed.data === "" ? null : parsed.data }, { count: "exact" })
+    .eq("id", user.id);
+  if (error || count === 0) return { ok: false, message: "No se pudo guardar el nombre. Intenta de nuevo." };
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Nombre guardado." };
+}

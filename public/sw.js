@@ -6,7 +6,7 @@
  *   - Si no hay red al navegar, se muestra /offline.
  * Las notificaciones push se agregan en la Fase 4.
  */
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `ae-static-${VERSION}`;
 const PRECACHE = ["/offline", "/icons/icon-192.png", "/icons/icon-512.png"];
 

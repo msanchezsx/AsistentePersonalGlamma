@@ -3,9 +3,9 @@ import { ServiceWorkerRegister } from "@/components/sw-register";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Asistente Ejecutivo", template: "%s · Asistente Ejecutivo" },
+  title: { default: "Asistente", template: "%s · Asistente" },
   description: "Asistente ejecutivo personal con inteligencia artificial.",
-  applicationName: "Asistente Ejecutivo",
+  applicationName: "Asistente",
   appleWebApp: { capable: true, title: "Asistente", statusBarStyle: "default" },
   formatDetection: { telephone: false },
   robots: { index: false, follow: false },

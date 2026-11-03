@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BoxLogo } from "@/components/box-logo";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/icon";
 import { MOBILE_PRIMARY, NAV_ITEMS } from "@/lib/navigation";
@@ -22,10 +23,8 @@ export function AppNav() {
         className="hidden md:flex md:w-60 md:shrink-0 md:flex-col md:gap-1 md:border-r md:border-border md:bg-surface md:px-3 md:py-5"
       >
         <div className="mb-4 flex items-center gap-2 px-3">
-          <span className="grid size-8 place-items-center rounded-lg bg-accent text-sm font-bold text-accent-text">
-            AE
-          </span>
-          <span className="font-semibold">Asistente Ejecutivo</span>
+          <BoxLogo className="size-8" />
+          <span className="font-semibold">Asistente</span>
         </div>
         {NAV_ITEMS.map((item) => {
           const active = isActive(pathname, item.href);
