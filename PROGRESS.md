@@ -2,7 +2,7 @@
 
 | Fase | Estado |
 |---|---|
-| 0. Preparación técnica | 🟡 Código listo y probado localmente; falta repositorio, Supabase y despliegue |
+| 0. Preparación técnica | 🟢 Desplegada en producción; pendiente prueba de autorización del celular |
 | 1. Agenda inteligente | ⏸ Espera aprobación de la Fase 0 |
 | 2. Inteligencia artificial | ⏸ |
 | 3. Outlook | ⏸ |
@@ -43,8 +43,10 @@ El desarrollo se ejecuta en un contenedor en la nube de Claude Code (no en la co
 | 0.9 | PWA | ✅ código / ⏳ instalación | Manifest y `sw.js` servidos correctamente; instalación en Android se prueba tras desplegar |
 | 0.10 | Documentación | ✅ | Este archivo y los demás `.md` |
 | 0.11 | Crear repositorio GitHub | ✅ | `msanchezsx/AsistentePersonalGlamma`, código subido a `main` |
-| 0.12 | Crear proyecto Supabase y aplicar migración | ⏳ | Requiere al usuario |
-| 0.13 | Desplegar en Vercel | ⏳ | Requiere al usuario (conectar repo y variables) |
+| 0.12 | Crear proyecto Supabase y aplicar migración | ✅ | Proyecto `kfjeywjkqouqnygxtmby`, esquema aplicado, registros cerrados, correo invitado, URLs configuradas |
+| 0.13 | Desplegar en Vercel | ✅ | https://asistente-personal-glamma-yv4c.vercel.app — `/api/health` con `supabaseConfigured: true` |
+| 0.14 | Instalar PWA en la tablet | ✅ | Instalada por el usuario (2026-11-03) |
+| 0.15 | Autorizar el celular desde la tablet | ⏳ | Pospuesta por el usuario (no tenía el celular) |
 
 ## Pruebas ejecutadas (2026-11-03)
 
@@ -54,8 +56,8 @@ El desarrollo se ejecuta en un contenedor en la nube de Claude Code (no en la co
 ## Pendientes para cerrar la Fase 0
 
 1. ~~Repositorio GitHub~~ ✅
-2. Proyecto Supabase → aplicar migración, desactivar registros, invitar el correo del usuario, configurar URLs.
-3. Proyecto Vercel → variables de entorno → despliegue.
+2. ~~Supabase~~ ✅
+3. ~~Vercel~~ ✅ (las variables `NEXT_PUBLIC_*` deben ser tipo **Config**, no Secret)
 4. Prueba integral: login desde el celular (se activa), login desde la tablet (queda pendiente), aprobar desde el celular, revocar y volver a aprobar, instalar la PWA en ambos.
 
 Guía paso a paso para el usuario: [docs/GUIA-SUPABASE-VERCEL.md](docs/GUIA-SUPABASE-VERCEL.md).
