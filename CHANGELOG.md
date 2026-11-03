@@ -7,6 +7,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 ### Cambiado (ajustes pedidos por el usuario)
 - La app se llama ahora "Asistente" (menú, inicio de sesión, título y manifest).
 - Nuevo icono y logo: caja de cartón. Iconos regenerados con `scripts/generate-icons.mjs`; caché del service worker en `v2`.
+- Pantalla de arranque con una caja de cartón girando (solo CSS; se quita sola a los ~2 s).
+- Logo de Productos Glama en el menú lateral, el inicio de sesión, el encabezado de Inicio en celular y la pantalla de arranque (`public/brand/glama-logo.png`).
 - Configuración → Cuenta: campo "¿Cómo te saludo?" (`profiles.preferred_name`) para el saludo de Inicio.
 
 ### Agregado (Fase 1.3 — Actividades recurrentes)

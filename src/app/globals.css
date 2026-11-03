@@ -72,3 +72,69 @@ body {
 .pb-safe {
   padding-bottom: max(env(safe-area-inset-bottom), 0px);
 }
+
+/* ---------- Pantalla de arranque: caja girando ---------- */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.25rem;
+  background: var(--bg);
+  animation: splash-out 0.45s ease 1.8s forwards;
+}
+.splash-scene {
+  width: 96px;
+  height: 96px;
+  perspective: 600px;
+}
+.splash-cube {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: splash-spin 1.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.splash-cube .face {
+  position: absolute;
+  inset: 0;
+  border: 3px solid #6b4423;
+  border-radius: 4px;
+  background: #c68a4d;
+}
+.splash-cube .front { transform: translateZ(48px); }
+.splash-cube .back { transform: rotateY(180deg) translateZ(48px); }
+.splash-cube .right { transform: rotateY(90deg) translateZ(48px); background: #a86f38; }
+.splash-cube .left { transform: rotateY(-90deg) translateZ(48px); background: #a86f38; }
+.splash-cube .top {
+  transform: rotateX(90deg) translateZ(48px);
+  background: linear-gradient(90deg, #e3b47c 40%, #f4e2bc 40% 60%, #e3b47c 60%);
+}
+.splash-cube .bottom { transform: rotateX(-90deg) translateZ(48px); background: #8f5c2c; }
+/* cinta que baja por el frente y la parte de atrás */
+.splash-cube .front,
+.splash-cube .back {
+  background: linear-gradient(90deg, #c68a4d 40%, #e9cf9a 40% 60%, #c68a4d 60%);
+  background-size: 100% 30%;
+  background-repeat: no-repeat;
+  background-color: #c68a4d;
+}
+.splash-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+@keyframes splash-spin {
+  from { transform: rotateX(-22deg) rotateY(0deg); }
+  to { transform: rotateX(-22deg) rotateY(360deg); }
+}
+@keyframes splash-out {
+  to { opacity: 0; visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-cube { animation: none; transform: rotateX(-22deg) rotateY(35deg); }
+}

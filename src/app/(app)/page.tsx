@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { LiveClock } from "@/components/live-clock";
+import { GlamaLogo } from "@/components/glama-logo";
 import { Card, EmptyState, PhaseBadge } from "@/components/ui";
 import { greetingFor } from "@/lib/datetime";
 import { getViewer } from "@/lib/session";
@@ -31,6 +32,8 @@ export default async function HomePage() {
   return (
     <div className="space-y-5">
       <header className="space-y-1">
+        {/* En celular no hay menú lateral: el logo va en el encabezado de Inicio. */}
+        <GlamaLogo className="mb-3 w-20 md:hidden" priority />
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           {greetingFor(now, viewer.timezone)}
           {name}

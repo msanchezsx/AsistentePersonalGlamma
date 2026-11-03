@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ServiceWorkerRegister } from "@/components/sw-register";
+import { Splash } from "@/components/splash";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="es-MX">
       <body className="min-h-dvh antialiased">
+        <Splash />
         {children}
         <ServiceWorkerRegister />
       </body>
