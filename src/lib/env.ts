@@ -13,16 +13,39 @@ const publicSchema = z.object({
 
 export type PublicEnv = z.infer<typeof publicSchema>;
 
-export function getPublicEnv(): PublicEnv | null {
-  const parsed = publicSchema.safeParse({
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+/** Quita espacios y comillas accidentales al copiar/pegar valores. */
+function clean(value: string | undefined): string | undefined {
+  const v = value
+    ?.trim()
+    .replace(/^["']|["']$/g, "")
+    .trim();
+  return v ? v : undefined;
+}
+
+function parsePublicEnv() {
+  return publicSchema.safeParse({
+    NEXT_PUBLIC_SUPABASE_URL: clean(process.env.NEXT_PUBLIC_SUPABASE_URL),
     // Supabase llama a la clave pública "publishable" (sb_publishable_…) en
     // proyectos nuevos y "anon" en los anteriores: se acepta cualquiera.
     NEXT_PUBLIC_SUPABASE_ANON_KEY:
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || undefined,
+      clean(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) ?? clean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+    NEXT_PUBLIC_SITE_URL: clean(process.env.NEXT_PUBLIC_SITE_URL),
   });
+}
+
+export function getPublicEnv(): PublicEnv | null {
+  const parsed = parsePublicEnv();
   return parsed.success ? parsed.data : null;
+}
+
+/** Nombres (nunca valores) de las variables públicas ausentes o inválidas. */
+export function publicEnvIssues(): string[] {
+  const parsed = parsePublicEnv();
+  if (parsed.success) return [];
+  const names = parsed.error.issues.map((i) => String(i.path[0]));
+  return [...new Set(names)].map((n) =>
+    n === "NEXT_PUBLIC_SUPABASE_ANON_KEY" ? "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" : n,
+  );
 }
 
 export function isSupabaseConfigured(): boolean {

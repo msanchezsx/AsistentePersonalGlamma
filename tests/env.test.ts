@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getPublicEnv, isEmailAllowed } from "@/lib/env";
+import { getPublicEnv, isEmailAllowed, publicEnvIssues } from "@/lib/env";
 
 afterEach(() => vi.unstubAllEnvs());
 
@@ -35,5 +35,19 @@ describe("clave publishable de Supabase", () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "");
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_ejemploFicticio1234567890");
     expect(getPublicEnv()?.NEXT_PUBLIC_SUPABASE_ANON_KEY).toBe("sb_publishable_ejemploFicticio1234567890");
+  });
+});
+
+describe("diagnóstico de configuración", () => {
+  afterEach(() => vi.unstubAllEnvs());
+  it("tolera espacios y comillas al pegar valores", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", '  "https://demo.supabase.co" ');
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", " sb_publishable_ejemploFicticio1234567890 ");
+    expect(getPublicEnv()?.NEXT_PUBLIC_SUPABASE_URL).toBe("https://demo.supabase.co");
+  });
+  it("reporta el nombre de la variable inválida", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL = https://demo.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_ejemploFicticio1234567890");
+    expect(publicEnvIssues()).toEqual(["NEXT_PUBLIC_SUPABASE_URL"]);
   });
 });
