@@ -19,6 +19,7 @@ export default async function NewMeetingPage() {
         <MeetingForm
           action={createMeeting}
           submitLabel="Agendar"
+          showRepeat
           projects={projects}
           clients={clients}
           defaults={{

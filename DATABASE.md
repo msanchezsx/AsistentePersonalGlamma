@@ -6,6 +6,7 @@ PostgreSQL en Supabase. Migraciones en `supabase/migrations/` (se aplican en ord
 |---|---|
 | `20261103000001_initial_schema.sql` | Esquema inicial (Fase 0) |
 | `20261103000002_tasks_all_day.sql` | `tasks.due_all_day`: fecha límite sin hora (Fase 1.1) |
+| `20261103000003_recurrences.sql` | `recurrence_rules.applies_to` (task/meeting), `recurrence_rules.reminder_minutes` e índices únicos `(recurrence_rule_id, starts_at)` en meetings y `(recurrence_rule_id, due_at)` en tasks (Fase 1.3) |
 
 ## Convenciones
 
@@ -28,7 +29,7 @@ PostgreSQL en Supabase. Migraciones en `supabase/migrations/` (se aplican en ord
 | Clientes | `clients` | Nombre único por usuario (sin distinguir mayúsculas). |
 | Contactos | `contacts` | Relación: jefe, equipo, cliente, proveedor, colega. Correo único por usuario. |
 | Proyectos | `projects` | `code` para número de pedido (p. ej. 103050). |
-| Recurrencias | `recurrence_rules` | RRULE (RFC 5545) + zona horaria. |
+| Recurrencias | `recurrence_rules` | RRULE (RFC 5545) + zona horaria, `applies_to` (task/meeting), `reminder_minutes`, `until_date`. Tareas: una repetición abierta a la vez, la siguiente se crea al cerrar. Reuniones: se generan 60 días adelante. |
 | Reuniones | `meetings`, `meeting_participants` | `draft` hasta confirmar; `external_provider/id` únicos para sincronizar calendario sin duplicar. |
 | Tareas | `tasks` | `due_all_day` = fecha sin hora (se guarda 23:59:59 local). Prioridad 1–5, urgente/importante (Eisenhower), `completion_confirmed`, `source`. `done` ⇔ `completed_at`. |
 | Comunicaciones | `communications` | Supertipo: correo, WhatsApp compartido, llamada, nota. Solo resumen, no cuerpo completo. |

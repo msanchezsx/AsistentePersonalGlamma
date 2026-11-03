@@ -37,6 +37,7 @@ export function TaskItem({ task, now, timeZone }: { task: Task; now: Date; timeZ
               {formatDue(task, now, timeZone)}
             </span>
           ) : null}
+          {task.recurrence_rule_id ? <span title="Se repite">↻ Se repite</span> : null}
           {task.is_urgent ? <Badge tone="danger">Urgente</Badge> : null}
           {task.is_important ? <Badge tone="accent">Importante</Badge> : null}
           {task.priority <= 2 ? <Badge tone="warn">{PRIORITY_LABELS[task.priority]}</Badge> : null}

@@ -12,7 +12,8 @@ import { getViewer } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { listRelationOptions } from "@/lib/tasks/queries";
 import { localDateKey, localTimeKey } from "@/lib/zoned-time";
-import { changeMeetingStatus, deleteMeeting, updateMeeting } from "../actions";
+import { describeRrule } from "@/lib/recurrence";
+import { changeMeetingStatus, deleteMeeting, stopMeetingSeries, updateMeeting } from "../actions";
 import { MeetingForm } from "../meeting-form";
 
 export const metadata: Metadata = { title: "Reunión" };
@@ -61,6 +62,11 @@ export default async function MeetingPage({
             La reunión se guardó, pero no los participantes o el recordatorio. Revísalos abajo y guarda de nuevo.
           </p>
         ) : null}
+        {aviso === "serie-detenida" ? (
+          <p role="status" className="rounded-xl bg-ok-soft px-4 py-2.5 text-sm text-ok">
+            Listo: la serie termina con esta reunión y se quitaron las siguientes programadas.
+          </p>
+        ) : null}
 
         <Card>
           <p className="font-medium">
@@ -87,6 +93,26 @@ export default async function MeetingPage({
             ))}
           </div>
         </Card>
+
+        {meeting.recurrence ? (
+          <Card>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm">
+                <span className="font-medium">Se repite:</span>{" "}
+                {describeRrule(meeting.recurrence.rrule, meeting.recurrence.until_date)}
+                <span className="block text-xs text-muted">
+                  Los cambios de abajo aplican solo a esta reunión. Para no repetirla más, detén la serie.
+                </span>
+              </p>
+              <form action={stopMeetingSeries}>
+                <input type="hidden" name="id" value={meeting.id} />
+                <ConfirmButton message="¿Detener la serie? Se quitarán las reuniones siguientes que aún estén programadas.">
+                  Detener repetición desde aquí
+                </ConfirmButton>
+              </form>
+            </div>
+          </Card>
+        ) : null}
 
         <Card title="Editar">
           <MeetingForm

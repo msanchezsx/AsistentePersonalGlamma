@@ -26,6 +26,7 @@ export function MeetingItem({ meeting, now, timeZone }: { meeting: Meeting; now:
           <p className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-muted">
             {inProgress ? <span className="font-medium text-ok">En curso</span> : null}
             {meeting.status !== "scheduled" ? <span>{MEETING_STATUS_LABELS[meeting.status]}</span> : null}
+            {meeting.recurrence_rule_id ? <span title="Se repite">↻</span> : null}
             {people.length ? <span>Con {people.join(", ")}</span> : null}
             {meeting.location ? <span>· {meeting.location}</span> : null}
             {meeting.project ? <span>· {meeting.project.code ?? meeting.project.name}</span> : null}

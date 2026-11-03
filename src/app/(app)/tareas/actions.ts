@@ -8,7 +8,9 @@ import { getViewer } from "@/lib/session";
 import { parseTaskForm, toDueFields, type TaskFormValues } from "@/lib/tasks/model";
 import { parseReminderMinutes } from "@/lib/reminders";
 import { syncReminder } from "@/lib/reminders-server";
-import { zonedToUtc } from "@/lib/zoned-time";
+import { localDateKey, zonedToUtc } from "@/lib/zoned-time";
+import { buildRrule, parseRepeatInput, type RepeatInput } from "@/lib/recurrence";
+import { createRule, endRule, spawnNextTask, updateRule } from "@/lib/recurrence-server";
 
 export type TaskFormState = {
   ok: boolean;
@@ -47,14 +49,44 @@ function fieldErrorsFrom(error: z.ZodError): Record<string, string> {
   return out;
 }
 
-export async function createTask(_prev: TaskFormState, formData: FormData): Promise<TaskFormState> {
+/** Valida el formulario completo, incluida la repetición. */
+function parseAll(formData: FormData) {
   const parsed = parseTaskForm(formData);
-  if (!parsed.success) return { ok: false, fieldErrors: fieldErrorsFrom(parsed.error) };
+  if (!parsed.success) return { ok: false as const, state: { ok: false, fieldErrors: fieldErrorsFrom(parsed.error) } };
+  const repeat = parseRepeatInput(formData, parsed.data.due_date);
+  if (!repeat.ok) return { ok: false as const, state: { ok: false, fieldErrors: { [repeat.field]: repeat.message } } };
+  return { ok: true as const, v: parsed.data, repeat: repeat.value };
+}
+
+function ruleFields(v: TaskFormValues, repeat: RepeatInput, reminder: number | null, tz: string) {
+  return {
+    rrule: buildRrule(repeat.option, v.due_date!)!,
+    timezone: tz,
+    starts_on: v.due_date!,
+    until_date: repeat.untilKey,
+    reminder_minutes: reminder,
+  };
+}
+
+export async function createTask(_prev: TaskFormState, formData: FormData): Promise<TaskFormState> {
+  const p = parseAll(formData);
+  if (!p.ok) return p.state;
 
   const { supabase, user } = await requireUser();
   const viewer = await getViewer();
-  const v = parsed.data;
+  const { v, repeat } = p;
   const due = toDueFields(v, viewer.timezone);
+  const reminder = parseReminderMinutes(formData.get("reminder"));
+
+  let recurrence_rule_id: string | null = null;
+  if (repeat.option) {
+    recurrence_rule_id = await createRule(supabase, user.id, {
+      applies_to: "task",
+      ...ruleFields(v, repeat, reminder, viewer.timezone),
+    });
+    if (!recurrence_rule_id) return { ok: false, message: "No se pudo guardar la repetición. Intenta de nuevo." };
+  }
+
   const { data, error } = await supabase
     .from("tasks")
     .insert({
@@ -67,13 +99,13 @@ export async function createTask(_prev: TaskFormState, formData: FormData): Prom
       project_id: v.project_id,
       client_id: v.client_id,
       source: "manual",
+      recurrence_rule_id,
       ...due,
     })
     .select("id")
     .single();
   if (error || !data) return { ok: false, message: "No se pudo guardar la tarea. Intenta de nuevo." };
 
-  const reminder = parseReminderMinutes(formData.get("reminder"));
   const r = await syncReminder(
     supabase,
     user.id,
@@ -90,13 +122,31 @@ export async function createTask(_prev: TaskFormState, formData: FormData): Prom
 export async function updateTask(_prev: TaskFormState, formData: FormData): Promise<TaskFormState> {
   const id = idSchema.safeParse(formData.get("id"));
   if (!id.success) return { ok: false, message: "Tarea inválida." };
-  const parsed = parseTaskForm(formData);
-  if (!parsed.success) return { ok: false, fieldErrors: fieldErrorsFrom(parsed.error) };
+  const p = parseAll(formData);
+  if (!p.ok) return p.state;
 
   const { supabase, user } = await requireUser();
   const viewer = await getViewer();
-  const v = parsed.data;
+  const { v, repeat } = p;
   const due = toDueFields(v, viewer.timezone);
+  const reminder = parseReminderMinutes(formData.get("reminder"));
+
+  const current = await supabase.from("tasks").select("recurrence_rule_id").eq("id", id.data).maybeSingle();
+  if (current.error || !current.data) return { ok: false, message: "No se pudo actualizar la tarea." };
+  let recurrence_rule_id = (current.data as { recurrence_rule_id: string | null }).recurrence_rule_id;
+  if (repeat.option) {
+    const fields = ruleFields(v, repeat, reminder, viewer.timezone);
+    if (recurrence_rule_id) {
+      if (!(await updateRule(supabase, recurrence_rule_id, fields)))
+        return { ok: false, message: "No se pudo guardar la repetición." };
+    } else {
+      recurrence_rule_id = await createRule(supabase, user.id, { applies_to: "task", ...fields });
+      if (!recurrence_rule_id) return { ok: false, message: "No se pudo guardar la repetición." };
+    }
+  } else {
+    recurrence_rule_id = null; // "No se repite": la tarea deja la serie.
+  }
+
   const { error, count } = await supabase
     .from("tasks")
     .update(
@@ -108,6 +158,7 @@ export async function updateTask(_prev: TaskFormState, formData: FormData): Prom
         is_important: v.is_important,
         project_id: v.project_id,
         client_id: v.client_id,
+        recurrence_rule_id,
         ...due,
       },
       { count: "exact" },
@@ -120,7 +171,7 @@ export async function updateTask(_prev: TaskFormState, formData: FormData): Prom
     user.id,
     { kind: "task", id: id.data },
     reminderTarget(v, due, viewer.timezone),
-    parseReminderMinutes(formData.get("reminder")),
+    reminder,
     v.title,
   );
   if (!r.ok) return { ok: false, message: "Se guardó la tarea, pero no el recordatorio. Intenta de nuevo." };
@@ -141,7 +192,7 @@ const statusActionSchema = z.object({
 export async function changeTaskStatus(formData: FormData): Promise<void> {
   const parsed = statusActionSchema.safeParse({ id: formData.get("id"), action: formData.get("action") });
   if (!parsed.success) return;
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const now = new Date().toISOString();
 
   const patch =
@@ -164,8 +215,34 @@ export async function changeTaskStatus(formData: FormData): Promise<void> {
       .update({ status: "cancelled" })
       .eq("task_id", parsed.data.id)
       .eq("status", "scheduled");
+
+    // Si la tarea se repite, crear la siguiente repetición.
+    const { data: task } = await supabase
+      .from("tasks")
+      .select(
+        "id, title, description, priority, is_urgent, is_important, due_at, due_all_day, project_id, client_id, recurrence_rule_id",
+      )
+      .eq("id", parsed.data.id)
+      .maybeSingle();
+    if (task) await spawnNextTask(supabase, user.id, task as Parameters<typeof spawnNextTask>[2]);
   }
   revalidateTaskViews();
+}
+
+/** Deja de repetir: esta tarea sale de la serie y no se crearán más. */
+export async function stopTaskRepeat(formData: FormData): Promise<void> {
+  const id = idSchema.safeParse(formData.get("id"));
+  if (!id.success) return;
+  const { supabase } = await requireUser();
+  const viewer = await getViewer();
+  const { data } = await supabase.from("tasks").select("due_at, recurrence_rule_id").eq("id", id.data).maybeSingle();
+  const t = data as { due_at: string | null; recurrence_rule_id: string | null } | null;
+  if (!t?.recurrence_rule_id) return;
+  const lastKey = t.due_at ? localDateKey(new Date(t.due_at), viewer.timezone) : localDateKey(new Date(), viewer.timezone);
+  await endRule(supabase, t.recurrence_rule_id, lastKey);
+  await supabase.from("tasks").update({ recurrence_rule_id: null }).eq("id", id.data);
+  revalidateTaskViews();
+  redirect(`/tareas/${id.data}?aviso=sin-repeticion`);
 }
 
 export async function deleteTask(formData: FormData): Promise<void> {

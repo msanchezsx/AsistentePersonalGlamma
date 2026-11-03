@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { REMINDER_OPTIONS } from "@/lib/reminders";
+import { RepeatFields } from "@/components/repeat-fields";
 import type { Option } from "@/lib/tasks/types";
 import type { MeetingFormState } from "./actions";
 
@@ -29,12 +30,15 @@ export function MeetingForm({
   projects,
   clients,
   submitLabel,
+  showRepeat = false,
 }: {
   action: (prev: MeetingFormState, formData: FormData) => Promise<MeetingFormState>;
   defaults: MeetingFormDefaults;
   projects: Option[];
   clients: Option[];
   submitLabel: string;
+  /** Solo al crear: la repetición de una serie existente se gestiona desde su detalle. */
+  showRepeat?: boolean;
 }) {
   const [state, formAction, pending] = useActionState<MeetingFormState, FormData>(action, null);
   const err = state?.fieldErrors ?? {};
@@ -75,6 +79,15 @@ export function MeetingForm({
         </Field>
       </div>
       <p className="-mt-3 text-xs text-muted">Si no indicas la hora de fin, la reunión dura 1 hora.</p>
+
+      {showRepeat ? (
+        <RepeatFields
+          defaultRepeat=""
+          defaultUntil=""
+          errors={err}
+          hint="Se agendan automáticamente las repeticiones de los próximos 60 días y se van agregando más."
+        />
+      ) : null}
 
       <Field label="Recordatorio" error={err.reminder} htmlFor="reminder">
         <select id="reminder" name="reminder" defaultValue={defaults.reminder} className={inputCls}>

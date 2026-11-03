@@ -46,6 +46,15 @@
 3. `middleware.ts` en cada petición: refresca la sesión (`getUser()` valida con Supabase), exige sesión y exige que `device_status` sea `active`. Si no, redirige a `/dispositivo` (o 403 en `/api/*`).
 4. Configuración → Dispositivos: aprobar o revocar.
 
+## Agenda y tareas (Fase 1)
+
+- Fechas y horas se capturan en hora local (America/Mexico_City) y se guardan en UTC (`src/lib/zoned-time.ts`).
+- Recordatorios: una fila en `reminders` por tarea o reunión (`src/lib/reminders-server.ts`). El envío llega en la Fase 4.
+- Recurrencias (`src/lib/recurrence.ts`, `src/lib/recurrence-server.ts`): subconjunto de RRULE calculado sobre fechas locales.
+  - Tareas: solo existe una repetición abierta; al terminarla o cancelarla se crea la siguiente.
+  - Reuniones: se generan las repeticiones de los próximos 60 días y se rellenan al consultar la agenda.
+  - Índices únicos evitan duplicados aunque dos dispositivos generen la misma repetición a la vez.
+
 ## Preparación para fases futuras
 
 - El esquema ya incluye las tablas de todas las fases (correos, notificaciones con deduplicación, suscripciones push por dispositivo, resúmenes, podcasts, incidencias, memoria) para no rehacer el modelo, pero **no hay lógica de esas fases implementada**.

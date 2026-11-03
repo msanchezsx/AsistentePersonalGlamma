@@ -224,4 +224,71 @@ select pg_temp.check((select count(*) from public.reminders where meeting_id = '
                      'al borrar la reunión se borran sus recordatorios');
 reset role;
 
+-- 14. Fase 1.3: actividades recurrentes
+select pg_temp.as_user('11111111-1111-1111-1111-111111111111');
+insert into public.recurrence_rules (id, user_id, rrule, timezone, starts_on, applies_to, reminder_minutes)
+values ('aaaaaaaa-0000-0000-0000-000000000020', '11111111-1111-1111-1111-111111111111',
+        'FREQ=WEEKLY;BYDAY=MO', 'America/Mexico_City', '2026-11-09', 'meeting', 15);
+insert into public.meetings (user_id, recurrence_rule_id, title, starts_at, ends_at, status, source, confirmed_at)
+values ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000020', 'Junta semanal',
+        '2026-11-09 16:00+00', '2026-11-09 17:00+00', 'scheduled', 'manual', now()),
+       ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000020', 'Junta semanal',
+        '2026-11-16 16:00+00', '2026-11-16 17:00+00', 'scheduled', 'manual', now());
+select pg_temp.check((select count(*) from public.meetings where recurrence_rule_id = 'aaaaaaaa-0000-0000-0000-000000000020') = 2,
+                     'se crean las repeticiones de una serie de reuniones');
+do $$ begin
+  insert into public.meetings (user_id, recurrence_rule_id, title, starts_at, ends_at, status, source)
+  values ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000020', 'Junta semanal',
+          '2026-11-09 16:00+00', '2026-11-09 17:00+00', 'scheduled', 'manual');
+  raise exception 'FALLÓ: repetición duplicada de reunión';
+exception when unique_violation then raise notice 'OK: una repetición de reunión no se duplica';
+end $$;
+insert into public.recurrence_rules (id, user_id, rrule, timezone, starts_on, applies_to)
+values ('aaaaaaaa-0000-0000-0000-000000000021', '11111111-1111-1111-1111-111111111111',
+        'FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR', 'America/Mexico_City', '2026-11-03', 'task');
+insert into public.tasks (user_id, recurrence_rule_id, title, due_at, due_all_day, source)
+values ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000021', 'Revisar pedidos',
+        '2026-11-04 05:59:59+00', true, 'recurrence');
+do $$ begin
+  insert into public.tasks (user_id, recurrence_rule_id, title, due_at, due_all_day, source)
+  values ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000021', 'Revisar pedidos',
+          '2026-11-04 05:59:59+00', true, 'recurrence');
+  raise exception 'FALLÓ: repetición duplicada de tarea';
+exception when unique_violation then raise notice 'OK: una repetición de tarea no se duplica';
+end $$;
+-- Tareas sin serie no se ven afectadas por el índice único
+insert into public.tasks (user_id, title, due_at) values
+  ('11111111-1111-1111-1111-111111111111', 'Suelta 1', '2026-11-04 05:59:59+00'),
+  ('11111111-1111-1111-1111-111111111111', 'Suelta 2', '2026-11-04 05:59:59+00');
+select pg_temp.check(true, 'tareas sin serie pueden compartir fecha');
+do $$ begin
+  insert into public.recurrence_rules (user_id, rrule, timezone, starts_on, applies_to)
+  values ('11111111-1111-1111-1111-111111111111', 'FREQ=DAILY', 'America/Mexico_City', '2026-11-03', 'email');
+  raise exception 'FALLÓ: applies_to inválido aceptado';
+exception when check_violation then raise notice 'OK: applies_to solo acepta task o meeting';
+end $$;
+do $$ begin
+  insert into public.recurrence_rules (user_id, rrule, timezone, starts_on, reminder_minutes)
+  values ('11111111-1111-1111-1111-111111111111', 'FREQ=DAILY', 'America/Mexico_City', '2026-11-03', -5);
+  raise exception 'FALLÓ: reminder_minutes negativo aceptado';
+exception when check_violation then raise notice 'OK: reminder_minutes fuera de rango se rechaza';
+end $$;
+-- Detener la serie: termina la regla y se borran las siguientes programadas
+update public.recurrence_rules set until_date = '2026-11-09' where id = 'aaaaaaaa-0000-0000-0000-000000000020';
+delete from public.meetings where recurrence_rule_id = 'aaaaaaaa-0000-0000-0000-000000000020'
+  and status = 'scheduled' and starts_at > '2026-11-09 16:00+00';
+select pg_temp.check((select count(*) from public.meetings where recurrence_rule_id = 'aaaaaaaa-0000-0000-0000-000000000020') = 1,
+                     'al detener la serie quedan solo las reuniones hasta esa fecha');
+reset role;
+-- C no ve ni usa reglas de A
+select pg_temp.as_user('33333333-3333-3333-3333-333333333333');
+select pg_temp.check((select count(*) from public.recurrence_rules) = 0, 'otro usuario no ve las reglas de repetición');
+do $$ begin
+  insert into public.tasks (user_id, recurrence_rule_id, title)
+  values ('33333333-3333-3333-3333-333333333333', 'aaaaaaaa-0000-0000-0000-000000000021', 'intrusa');
+  raise exception 'FALLÓ: tarea colgada de regla ajena';
+exception when foreign_key_violation then raise notice 'OK: no se puede usar la regla de repetición de otro usuario';
+end $$;
+reset role;
+
 \echo 'TODAS LAS PRUEBAS DE BASE DE DATOS PASARON'

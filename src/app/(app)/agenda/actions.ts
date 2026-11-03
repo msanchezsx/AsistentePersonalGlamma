@@ -8,6 +8,9 @@ import { getViewer } from "@/lib/session";
 import { parseMeetingForm, toMeetingTimes, type MeetingFormValues } from "@/lib/meetings/model";
 import { parseReminderMinutes } from "@/lib/reminders";
 import { syncReminder } from "@/lib/reminders-server";
+import { buildRrule, parseRepeatInput } from "@/lib/recurrence";
+import { createRule, endRule, getRule, materializeMeetings } from "@/lib/recurrence-server";
+import { localDateKey } from "@/lib/zoned-time";
 
 export type MeetingFormState = { ok: boolean; message?: string; fieldErrors?: Record<string, string> } | null;
 
@@ -60,19 +63,63 @@ function meetingRow(v: MeetingFormValues, timeZone: string) {
 export async function createMeeting(_prev: MeetingFormState, formData: FormData): Promise<MeetingFormState> {
   const parsed = parseMeetingForm(formData);
   if (!parsed.success) return { ok: false, fieldErrors: fieldErrorsFrom(parsed.error) };
+  const repeat = parseRepeatInput(formData, parsed.data.date);
+  if (!repeat.ok) return { ok: false, fieldErrors: { [repeat.field]: repeat.message } };
   const reminder = parseReminderMinutes(formData.get("reminder"));
 
   const { supabase, user } = await requireUser();
   const viewer = await getViewer();
   const row = meetingRow(parsed.data, viewer.timezone);
 
+  let recurrence_rule_id: string | null = null;
+  if (repeat.value.option) {
+    recurrence_rule_id = await createRule(supabase, user.id, {
+      applies_to: "meeting",
+      rrule: buildRrule(repeat.value.option, parsed.data.date)!,
+      timezone: viewer.timezone,
+      starts_on: parsed.data.date,
+      until_date: repeat.value.untilKey,
+      reminder_minutes: reminder,
+    });
+    if (!recurrence_rule_id) return { ok: false, message: "No se pudo guardar la repetición. Intenta de nuevo." };
+  }
+
   // Creada por el usuario de forma explícita: queda programada y confirmada.
   const { data, error } = await supabase
     .from("meetings")
-    .insert({ ...row, user_id: user.id, status: "scheduled", source: "manual", confirmed_at: new Date().toISOString() })
+    .insert({
+      ...row,
+      user_id: user.id,
+      status: "scheduled",
+      source: "manual",
+      confirmed_at: new Date().toISOString(),
+      recurrence_rule_id,
+    })
     .select("id")
     .single();
   if (error || !data) return { ok: false, message: "No se pudo guardar la reunión. Intenta de nuevo." };
+
+  if (recurrence_rule_id) {
+    const rule = await getRule(supabase, recurrence_rule_id);
+    if (rule) {
+      await materializeMeetings(
+        supabase,
+        user.id,
+        rule,
+        {
+          title: row.title,
+          description: row.description,
+          location: row.location,
+          project_id: row.project_id,
+          client_id: row.client_id,
+          start_time: parsed.data.start_time,
+          duration_minutes: Math.round((new Date(row.ends_at).getTime() - new Date(row.starts_at).getTime()) / 60000),
+          participants: parsed.data.participants,
+        },
+        parsed.data.date,
+      );
+    }
+  }
 
   const okP = await replaceParticipants(supabase, user.id, data.id, parsed.data.participants);
   const okR = await syncReminder(
@@ -140,6 +187,30 @@ export async function changeMeetingStatus(formData: FormData): Promise<void> {
   }
   revalidateViews();
   revalidatePath(`/agenda/${parsed.data.id}`);
+}
+
+/**
+ * Detiene la serie desde esta reunión: no habrá repeticiones después de ella
+ * y se eliminan las siguientes que siguen programadas (las ya realizadas,
+ * canceladas o pasadas se conservan en el historial).
+ */
+export async function stopMeetingSeries(formData: FormData): Promise<void> {
+  const id = idSchema.safeParse(formData.get("id"));
+  if (!id.success) return;
+  const { supabase } = await requireUser();
+  const viewer = await getViewer();
+  const { data } = await supabase.from("meetings").select("starts_at, recurrence_rule_id").eq("id", id.data).maybeSingle();
+  const m = data as { starts_at: string; recurrence_rule_id: string | null } | null;
+  if (!m?.recurrence_rule_id) return;
+  await endRule(supabase, m.recurrence_rule_id, localDateKey(new Date(m.starts_at), viewer.timezone));
+  await supabase
+    .from("meetings")
+    .delete()
+    .eq("recurrence_rule_id", m.recurrence_rule_id)
+    .eq("status", "scheduled")
+    .gt("starts_at", m.starts_at);
+  revalidateViews();
+  redirect(`/agenda/${id.data}?aviso=serie-detenida`);
 }
 
 export async function deleteMeeting(formData: FormData): Promise<void> {

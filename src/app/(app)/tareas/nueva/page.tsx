@@ -31,6 +31,8 @@ export default async function NewTaskPage() {
             project_id: "",
             client_id: "",
             reminder: "",
+            repeat: "",
+            repeat_until: "",
           }}
         />
       </Card>

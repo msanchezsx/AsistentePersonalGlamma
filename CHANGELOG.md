@@ -4,6 +4,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar]
 
+### Agregado (Fase 1.3 — Actividades recurrentes)
+- Campo "Repetir" en tareas y reuniones: todos los días, de lunes a viernes, cada semana, cada 2 semanas o cada mes, con fecha final opcional.
+- Tareas: al terminar o cancelar una tarea que se repite se crea la siguiente (nunca en el pasado) con su recordatorio. Botón "Dejar de repetir".
+- Reuniones: se agendan las repeticiones de los próximos 60 días y se rellenan al abrir Inicio o Agenda. "Detener repetición desde aquí" termina la serie y quita las siguientes programadas.
+- Migración `20261103000003_recurrences.sql`: `recurrence_rules.applies_to`, `recurrence_rules.reminder_minutes` e índices únicos que impiden repeticiones duplicadas.
+- Cálculo de repeticiones sin dependencias (`src/lib/recurrence.ts`), probado con fines de semana, semanas alternas y meses sin día 31.
+
 ### Agregado (Fase 1.2 — Reuniones y recordatorios)
 - Agenda: reuniones agrupadas por día (desde hoy), crear, editar, marcar como realizada / no asistí, cancelar y eliminar.
 - Participantes escritos a mano (separados por coma), lugar o enlace, proyecto y cliente.

@@ -11,7 +11,8 @@ import { createClient } from "@/lib/supabase/server";
 import { minutesBefore } from "@/lib/reminders";
 import { getScheduledReminder } from "@/lib/reminders-server";
 import { zonedToUtc } from "@/lib/zoned-time";
-import { changeTaskStatus, deleteTask, updateTask } from "../actions";
+import { describeRrule, repeatOptionOf } from "@/lib/recurrence";
+import { changeTaskStatus, deleteTask, stopTaskRepeat, updateTask } from "../actions";
 import { ConfirmButton } from "@/components/confirm-button";
 import { TaskForm } from "../task-form";
 
@@ -62,6 +63,29 @@ export default async function EditTaskPage({
             La tarea se guardó, pero no el recordatorio. Elígelo de nuevo abajo y guarda.
           </p>
         ) : null}
+        {aviso === "sin-repeticion" ? (
+          <p role="status" className="rounded-xl bg-ok-soft px-4 py-2.5 text-sm text-ok">
+            Listo: esta tarea ya no se repetirá.
+          </p>
+        ) : null}
+        {task.recurrence ? (
+          <Card>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm">
+                <span className="font-medium">Se repite:</span> {describeRrule(task.recurrence.rrule, task.recurrence.until_date)}
+                <span className="block text-xs text-muted">
+                  Al terminarla o cancelarla se crea la siguiente repetición.
+                </span>
+              </p>
+              <form action={stopTaskRepeat}>
+                <input type="hidden" name="id" value={task.id} />
+                <ConfirmButton message="¿Dejar de repetir esta tarea? No se crearán más repeticiones.">
+                  Dejar de repetir
+                </ConfirmButton>
+              </form>
+            </div>
+          </Card>
+        ) : null}
         <Card>
           <div className="flex flex-wrap gap-2">
             {statusButtons.map((b) => (
@@ -102,6 +126,8 @@ export default async function EditTaskPage({
               project_id: task.project_id ?? "",
               client_id: task.client_id ?? "",
               reminder: reminderValue,
+              repeat: repeatOptionOf(task.recurrence?.rrule),
+              repeat_until: task.recurrence?.until_date ?? "",
               ...dueDefaults,
             }}
           />

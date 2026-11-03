@@ -5,6 +5,8 @@ import { useActionState } from "react";
 import type { Option } from "@/lib/tasks/types";
 import { PRIORITY_LABELS } from "@/lib/tasks/labels";
 import { REMINDER_OPTIONS } from "@/lib/reminders";
+import type { RepeatOption } from "@/lib/recurrence";
+import { RepeatFields } from "@/components/repeat-fields";
 import type { TaskFormState } from "./actions";
 
 export type TaskFormDefaults = {
@@ -19,6 +21,8 @@ export type TaskFormDefaults = {
   project_id: string;
   client_id: string;
   reminder: string;
+  repeat: RepeatOption;
+  repeat_until: string;
 };
 
 const inputCls =
@@ -76,6 +80,13 @@ export function TaskForm({
           <input id="due_time" name="due_time" type="time" defaultValue={defaults.due_time} className={inputCls} />
         </Field>
       </div>
+
+      <RepeatFields
+        defaultRepeat={defaults.repeat}
+        defaultUntil={defaults.repeat_until}
+        errors={err}
+        hint="Al terminar (o cancelar) una tarea que se repite, se crea la siguiente automáticamente."
+      />
 
       <Field label="Recordatorio" error={err.reminder} htmlFor="reminder">
         <select id="reminder" name="reminder" defaultValue={defaults.reminder} className={inputCls}>

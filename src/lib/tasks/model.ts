@@ -24,10 +24,12 @@ export type Task = {
   updated_at: string;
   project?: { id: string; name: string; code: string | null } | null;
   client?: { id: string; name: string } | null;
+  recurrence_rule_id?: string | null;
+  recurrence?: { id: string; rrule: string; until_date: string | null } | null;
 };
 
 export const TASK_SELECT =
-  "id, title, description, status, priority, is_urgent, is_important, due_at, due_all_day, completed_at, completion_confirmed, project_id, client_id, source, created_at, updated_at, project:projects(id, name, code), client:clients(id, name)";
+  "id, title, description, status, priority, is_urgent, is_important, due_at, due_all_day, completed_at, completion_confirmed, project_id, client_id, source, created_at, updated_at, project:projects(id, name, code), client:clients(id, name), recurrence_rule_id, recurrence:recurrence_rules(id, rrule, until_date)";
 
 const optionalUuid = z
   .string()
