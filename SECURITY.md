@@ -15,6 +15,7 @@
 | Variables de entorno | Claves solo en servidor; únicamente la URL y la clave pública de Supabase llevan `NEXT_PUBLIC_`. `.env*` en `.gitignore` (excepto `.env.example`). |
 | Cabeceras HTTP | CSP restrictiva (solo el propio dominio y `*.supabase.co`), `X-Frame-Options: DENY`, HSTS, `nosniff`, `Referrer-Policy`, `Permissions-Policy` (sin cámara, micrófono, ubicación ni pagos), `noindex`. |
 | PWA | El service worker no cachea páginas ni respuestas con datos personales; solo estáticos. |
+| Asistente (Fase 2) | `ANTHROPIC_API_KEY` solo en el servidor (Secret en Vercel, sin `NEXT_PUBLIC_`); el navegador nunca llama a Claude. Las herramientas de escritura solo crean propuestas en `assistant_actions` (lista blanca por `CHECK`); se ejecutan únicamente cuando el usuario toca Confirmar, con bloqueo para que un doble toque no ejecute dos veces. Las entradas de las herramientas se validan con Zod. No hay herramientas para enviar correos o mensajes, ni para borrar datos. El historial de mensajes no se puede editar. |
 | Datos de prueba | Solo ficticios (`example.com`, "Cliente Demo"). |
 
 ## Riesgos residuales conocidos

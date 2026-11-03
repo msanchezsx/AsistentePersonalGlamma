@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar]
 
+### Agregado (Fase 2 — Asistente con inteligencia artificial)
+- Pantalla **Asistente** (`/inteligencia`): conversación con Claude (Claude API, modelo `claude-opus-5-5` por omisión) con historial de conversaciones.
+- El asistente consulta datos reales con herramientas: agenda de un rango de fechas, búsqueda de tareas (abiertas, cerradas, vencidas) y memoria.
+- Acciones autorizadas: el asistente solo **propone** crear una tarea, agendar una reunión, marcar una tarea como terminada o guardar algo en memoria. Cada propuesta aparece con botones **Confirmar / Descartar**; nada se ejecuta sin tu confirmación.
+- Memoria estructurada (`/inteligencia/memoria`): lo que el asistente sabe de ti, por categoría, con botón "Olvidar".
+- Migración `20261103000004_assistant.sql`: `assistant_conversations`, `assistant_messages` (solo se agregan, no se editan) y `assistant_actions` (lista blanca de acciones; estado pendiente/confirmada/descartada/fallida, con auditoría).
+- Nueva dependencia: `@anthropic-ai/sdk` (SDK oficial de Anthropic), solo en el servidor.
+
 ### Agregado (Fase 1.6 — Sincronización entre dispositivos)
 - Las pantallas se actualizan solas al volver a la app, al recuperar la conexión y cada minuto mientras están a la vista (no en formularios, para no interrumpir).
 - Ediciones simultáneas: si una tarea o reunión cambió en otro dispositivo mientras la editabas, no se sobrescribe; se pide recargar (bloqueo optimista con `updated_at`).

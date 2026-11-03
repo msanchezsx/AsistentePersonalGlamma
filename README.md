@@ -36,7 +36,13 @@ UI_PREVIEW=1 npm run dev
 3. En Authentication → Users → **Invite user**: invita tu correo (el mismo de `ALLOWED_EMAILS`).
 4. En Authentication → URL Configuration: `Site URL` = URL de la app y agrega `<URL>/auth/callback` en Redirect URLs.
 
+Después aplica, en orden, las migraciones siguientes de `supabase/migrations/` (cada una en SQL Editor).
+
 Detalle del modelo: [DATABASE.md](DATABASE.md).
+
+## Asistente (Fase 2)
+
+Agrega `ANTHROPIC_API_KEY` (console.anthropic.com → API Keys) en Vercel como variable **Secret** de servidor. Sin ella, la pantalla Asistente muestra un aviso y el resto de la app funciona igual.
 
 ## Scripts
 

@@ -62,6 +62,14 @@
 - Las ediciones usan bloqueo optimista: el formulario envía `updated_at` y la actualización solo procede si no cambió (`src/lib/concurrency.ts`).
 - Se evaluó Supabase Realtime; se pospone porque requiere publicar tablas y abrir WebSockets, y para dos dispositivos personales basta con este esquema.
 
+## Asistente con IA (Fase 2)
+
+- `src/lib/assistant/run.ts`: un turno = guardar mensaje del usuario → llamar a Claude (`client.beta.messages.create`, prompt de sistema cacheado, esfuerzo medio, respaldo de modelo del lado del servidor) → ejecutar herramientas → repetir (máx. 8 rondas) → guardar cada mensaje tal cual.
+- El contexto (fecha y hora local, memoria confirmada, estado de las propuestas) viaja dentro del mensaje del usuario para no modificar el historial previo.
+- `src/lib/assistant/tools.ts`: herramientas estrictas. Lectura: `consultar_agenda`, `buscar_tareas`, `consultar_memoria`. Propuesta: `proponer_tarea`, `proponer_reunion`, `proponer_completar_tarea`, `proponer_recordar` (insertan en `assistant_actions` con estado `pending`).
+- `src/lib/assistant/execute.ts`: ejecuta una propuesta solo desde la acción de servidor `decideAction`, tras la confirmación del usuario.
+- Todas las consultas usan la sesión del usuario (RLS), nunca la clave de servicio.
+
 ## Preparación para fases futuras
 
 - El esquema ya incluye las tablas de todas las fases (correos, notificaciones con deduplicación, suscripciones push por dispositivo, resúmenes, podcasts, incidencias, memoria) para no rehacer el modelo, pero **no hay lógica de esas fases implementada**.

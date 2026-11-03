@@ -7,6 +7,7 @@ PostgreSQL en Supabase. Migraciones en `supabase/migrations/` (se aplican en ord
 | `20261103000001_initial_schema.sql` | Esquema inicial (Fase 0) |
 | `20261103000002_tasks_all_day.sql` | `tasks.due_all_day`: fecha límite sin hora (Fase 1.1) |
 | `20261103000003_recurrences.sql` | `recurrence_rules.applies_to` (task/meeting), `recurrence_rules.reminder_minutes` e índices únicos `(recurrence_rule_id, starts_at)` en meetings y `(recurrence_rule_id, due_at)` en tasks (Fase 1.3) |
+| `20261103000004_assistant.sql` | Asistente: `assistant_conversations`, `assistant_messages` (solo inserción), `assistant_actions` (propuestas con confirmación) (Fase 2) |
 
 ## Convenciones
 
@@ -43,6 +44,8 @@ PostgreSQL en Supabase. Migraciones en `supabase/migrations/` (se aplican en ord
 | Resúmenes diarios | `daily_summaries` | Uno por día y tipo (`morning`/`closing`); `sources` registra qué se consultó y qué falló. |
 | Podcasts | `podcasts` | Uno por día; audio en Storage privado. |
 | Auditoría | `audit_log` | Inmutable vía API. Sin FK a usuarios a propósito (los triggers escriben durante el borrado en cascada). |
+| Conversaciones del asistente | `assistant_conversations`, `assistant_messages` | Los mensajes guardan el contenido completo de la API (`content` jsonb) y el texto visible (`display_text`). Sin `update`: el historial solo crece. Se borran en cascada con la conversación. |
+| Acciones propuestas | `assistant_actions` | `kind` en lista blanca (`create_task`, `create_meeting`, `complete_task`, `remember`); `status` pending → confirmed/rejected/failed; `result_id` del registro creado. Auditada. |
 | Memoria del asistente | `assistant_memory` | `confirmed` distingue hechos de inferencias; las correcciones crean un registro nuevo y el anterior apunta con `superseded_by`. |
 
 ### Formato de `incidents.analysis`

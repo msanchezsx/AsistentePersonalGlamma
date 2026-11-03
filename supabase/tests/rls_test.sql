@@ -310,4 +310,51 @@ select pg_temp.check((select title from public.tasks where id = 'aaaaaaaa-0000-0
                      'se conserva el cambio más reciente');
 reset role;
 
+-- 16. Fase 2: asistente (conversaciones, mensajes de solo agregar, acciones por confirmar)
+select pg_temp.as_user('11111111-1111-1111-1111-111111111111');
+insert into public.assistant_conversations (id, user_id, title)
+values ('aaaaaaaa-0000-0000-0000-000000000040', '11111111-1111-1111-1111-111111111111', 'Prueba');
+insert into public.assistant_messages (user_id, conversation_id, role, content, display_text)
+values ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000040', 'user',
+        '[{"type":"text","text":"hola"}]', 'hola');
+do $$ begin
+  update public.assistant_messages set display_text = 'cambiado';
+  raise exception 'FALLÓ: se pudo editar un mensaje';
+exception when insufficient_privilege then raise notice 'OK: los mensajes del asistente no se pueden editar';
+end $$;
+insert into public.assistant_actions (id, user_id, conversation_id, kind, payload, summary)
+values ('aaaaaaaa-0000-0000-0000-000000000041', '11111111-1111-1111-1111-111111111111',
+        'aaaaaaaa-0000-0000-0000-000000000040', 'create_task', '{"title":"x"}', 'Crear tarea x');
+select pg_temp.check((select status from public.assistant_actions where id = 'aaaaaaaa-0000-0000-0000-000000000041') = 'pending',
+                     'una acción propuesta queda pendiente de confirmar');
+do $$ begin
+  insert into public.assistant_actions (user_id, conversation_id, kind, payload, summary)
+  values ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000040', 'send_email', '{}', 'x');
+  raise exception 'FALLÓ: tipo de acción no permitido aceptado';
+exception when check_violation then raise notice 'OK: el asistente no puede proponer acciones fuera de la lista (p. ej. enviar correos)';
+end $$;
+reset role;
+select pg_temp.as_user('33333333-3333-3333-3333-333333333333');
+select pg_temp.check((select count(*) from public.assistant_messages) = 0 and (select count(*) from public.assistant_actions) = 0,
+                     'otro usuario no ve conversaciones ni acciones ajenas');
+do $$ begin
+  insert into public.assistant_messages (user_id, conversation_id, role, content)
+  values ('33333333-3333-3333-3333-333333333333', 'aaaaaaaa-0000-0000-0000-000000000040', 'user', '[]');
+  raise exception 'FALLÓ: mensaje en conversación ajena';
+exception when foreign_key_violation then raise notice 'OK: no se pueden escribir mensajes en conversaciones ajenas';
+end $$;
+reset role;
+select pg_temp.as_user('11111111-1111-1111-1111-111111111111');
+delete from public.assistant_conversations where id = 'aaaaaaaa-0000-0000-0000-000000000040';
+select pg_temp.check((select count(*) from public.assistant_messages) = 0 and (select count(*) from public.assistant_actions) = 0,
+                     'al borrar la conversación se borran sus mensajes y acciones');
+reset role;
+do $$ begin
+  set local role anon;
+  perform 1 from public.assistant_messages;
+  raise exception 'FALLÓ: anon lee mensajes';
+exception when insufficient_privilege then raise notice 'OK: anon no accede al asistente';
+end $$;
+reset role;
+
 \echo 'TODAS LAS PRUEBAS DE BASE DE DATOS PASARON'

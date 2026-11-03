@@ -3,8 +3,8 @@
 | Fase | Estado |
 |---|---|
 | 0. Preparación técnica | 🟢 Desplegada en producción; pendiente prueba de autorización del celular |
-| 1. Agenda inteligente | 🟡 En curso (aprobada 2026-11-03) |
-| 2. Inteligencia artificial | ⏸ |
+| 1. Agenda inteligente | 🟢 Completa (1.6 pendiente de prueba del usuario) |
+| 2. Inteligencia artificial | 🟡 Publicada; falta migración 0004 y clave de Claude (aprobada 2026-11-03) |
 | 3. Outlook | ⏸ |
 | 4. Automatizaciones | ⏸ |
 | 5. Podcast | ⏸ |
@@ -75,6 +75,18 @@ Guía paso a paso para el usuario: [docs/GUIA-SUPABASE-VERCEL.md](docs/GUIA-SUPA
 
 Nota: no hay acceso de red desde el entorno de desarrollo a Supabase, por lo que las consultas reales se validan en producción por el usuario.
 
+## Fase 2 — Actividades
+
+| # | Actividad | Estado | Validación |
+|---|---|---|---|
+| 2.1 | Conexión con Claude API (servidor) | ✅ Código listo | Falta `ANTHROPIC_API_KEY` en Vercel |
+| 2.2 | Asistente conversacional con historial | ✅ Código listo | Pantalla Asistente |
+| 2.3 | Consultas a la base (agenda, tareas, memoria) | ✅ Código listo | 84 pruebas unitarias |
+| 2.4 | Acciones autorizadas (proponer → confirmar) | ✅ Código listo | Pruebas SQL: lista blanca, aislamiento, mensajes no editables |
+| 2.5 | Memoria estructurada | ✅ Código listo | Pantalla Memoria |
+
+Pendiente del usuario: ejecutar `20261103000004_assistant.sql` en Supabase y agregar `ANTHROPIC_API_KEY`; después probar en la tablet.
+
 ## Siguiente actividad
 
-Cierre de la Fase 1 tras validar 1.6: presentar resultados y pedir aprobación para la Fase 2.
+Prueba de la Fase 2 por el usuario. Después, Fase 3 (Outlook), que requiere registrar una aplicación en Azure.
