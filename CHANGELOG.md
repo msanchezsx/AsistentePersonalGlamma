@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [Sin publicar]
+
+### Cambiado
+- Se acepta `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (nombre actual de Supabase) además de `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+
 ## [0.1.0] - 2026-11-03 — Fase 0
 
 ### Agregado

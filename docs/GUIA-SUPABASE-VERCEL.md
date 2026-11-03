@@ -46,8 +46,8 @@ Sigue los pasos en orden. Ninguno requiere instalar nada en tu computadora. **No
 
    | Nombre | Valor | Dónde se obtiene |
    |---|---|---|
-   | `NEXT_PUBLIC_SUPABASE_URL` | `https://xxxx.supabase.co` | Supabase → Project Settings → API (o "Connect") → Project URL |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | clave `anon` / `publishable` | Mismo lugar → API Keys → anon public |
+   | `NEXT_PUBLIC_SUPABASE_URL` | `https://kfjeywjkqouqnygxtmby.supabase.co` | Supabase → botón **Connect** → Project URL |
+   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` | Mismo lugar (es la clave pública; nunca uses la `secret` / `service_role`) |
    | `ALLOWED_EMAILS` | tu correo | El mismo que invitaste |
    | `APP_TIMEZONE` | `America/Mexico_City` | — |
 

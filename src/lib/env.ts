@@ -16,7 +16,10 @@ export type PublicEnv = z.infer<typeof publicSchema>;
 export function getPublicEnv(): PublicEnv | null {
   const parsed = publicSchema.safeParse({
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    // Supabase llama a la clave pública "publishable" (sb_publishable_…) en
+    // proyectos nuevos y "anon" en los anteriores: se acepta cualquiera.
+    NEXT_PUBLIC_SUPABASE_ANON_KEY:
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || undefined,
   });
   return parsed.success ? parsed.data : null;

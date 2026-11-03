@@ -27,3 +27,13 @@ describe("variables de entorno", () => {
     expect(isEmailAllowed("persona@example.com")).toBe(false);
   });
 });
+
+describe("clave publishable de Supabase", () => {
+  afterEach(() => vi.unstubAllEnvs());
+  it("acepta NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://demo.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_ejemploFicticio1234567890");
+    expect(getPublicEnv()?.NEXT_PUBLIC_SUPABASE_ANON_KEY).toBe("sb_publishable_ejemploFicticio1234567890");
+  });
+});
