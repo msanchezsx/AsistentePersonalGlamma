@@ -55,6 +55,13 @@
   - Reuniones: se generan las repeticiones de los próximos 60 días y se rellenan al consultar la agenda.
   - Índices únicos evitan duplicados aunque dos dispositivos generen la misma repetición a la vez.
 
+## Sincronización entre dispositivos (Fase 1.6)
+
+- La fuente de verdad es Supabase; los dispositivos no guardan copias locales de los datos.
+- `src/components/live-sync.tsx` vuelve a pedir los datos (`router.refresh()`) al volver a la app, al reconectar y cada 60 s, excepto en pantallas con formulario.
+- Las ediciones usan bloqueo optimista: el formulario envía `updated_at` y la actualización solo procede si no cambió (`src/lib/concurrency.ts`).
+- Se evaluó Supabase Realtime; se pospone porque requiere publicar tablas y abrir WebSockets, y para dos dispositivos personales basta con este esquema.
+
 ## Preparación para fases futuras
 
 - El esquema ya incluye las tablas de todas las fases (correos, notificaciones con deduplicación, suscripciones push por dispositivo, resúmenes, podcasts, incidencias, memoria) para no rehacer el modelo, pero **no hay lógica de esas fases implementada**.

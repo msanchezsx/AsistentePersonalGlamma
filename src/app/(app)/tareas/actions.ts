@@ -8,6 +8,7 @@ import { getViewer } from "@/lib/session";
 import { parseTaskForm, toDueFields, type TaskFormValues } from "@/lib/tasks/model";
 import { parseReminderMinutes } from "@/lib/reminders";
 import { syncReminder } from "@/lib/reminders-server";
+import { CONFLICT_MESSAGE, readVersion } from "@/lib/concurrency";
 import { localDateKey, zonedToUtc } from "@/lib/zoned-time";
 import { buildRrule, parseRepeatInput, type RepeatInput } from "@/lib/recurrence";
 import { createRule, endRule, spawnNextTask, updateRule } from "@/lib/recurrence-server";
@@ -132,8 +133,16 @@ export async function updateTask(_prev: TaskFormState, formData: FormData): Prom
   const due = toDueFields(v, viewer.timezone);
   const reminder = parseReminderMinutes(formData.get("reminder"));
 
-  const current = await supabase.from("tasks").select("recurrence_rule_id").eq("id", id.data).maybeSingle();
+  const current = await supabase
+    .from("tasks")
+    .select("recurrence_rule_id, updated_at")
+    .eq("id", id.data)
+    .maybeSingle();
   if (current.error || !current.data) return { ok: false, message: "No se pudo actualizar la tarea." };
+  const version = readVersion(formData);
+  if (version && Date.parse((current.data as { updated_at: string }).updated_at) !== Date.parse(version)) {
+    return { ok: false, message: CONFLICT_MESSAGE };
+  }
   let recurrence_rule_id = (current.data as { recurrence_rule_id: string | null }).recurrence_rule_id;
   if (repeat.option) {
     const fields = ruleFields(v, repeat, reminder, viewer.timezone);
@@ -164,8 +173,10 @@ export async function updateTask(_prev: TaskFormState, formData: FormData): Prom
       },
       { count: "exact" },
     )
-    .eq("id", id.data);
-  if (error || count === 0) return { ok: false, message: "No se pudo actualizar la tarea." };
+    .eq("id", id.data)
+    .eq("updated_at", (current.data as { updated_at: string }).updated_at);
+  if (error) return { ok: false, message: "No se pudo actualizar la tarea." };
+  if (count === 0) return { ok: false, message: CONFLICT_MESSAGE };
 
   const r = await syncReminder(
     supabase,

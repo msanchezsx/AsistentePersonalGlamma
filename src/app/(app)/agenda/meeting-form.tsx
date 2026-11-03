@@ -10,6 +10,8 @@ import type { MeetingFormState } from "./actions";
 
 export type MeetingFormDefaults = {
   id?: string;
+  /** updated_at al abrir el formulario: detecta cambios hechos en otro dispositivo. */
+  version?: string;
   title: string;
   description: string;
   location: string;
@@ -48,6 +50,7 @@ export function MeetingForm({
   return (
     <form action={formAction} className="space-y-5">
       {defaults.id ? <input type="hidden" name="id" value={defaults.id} /> : null}
+      {defaults.version ? <input type="hidden" name="version" value={defaults.version} /> : null}
 
       <Field label="Título" error={err.title} htmlFor="title">
         <input

@@ -8,6 +8,7 @@ import { getViewer } from "@/lib/session";
 import { parseMeetingForm, toMeetingTimes, type MeetingFormValues } from "@/lib/meetings/model";
 import { parseReminderMinutes } from "@/lib/reminders";
 import { syncReminder } from "@/lib/reminders-server";
+import { CONFLICT_MESSAGE, readVersion } from "@/lib/concurrency";
 import { buildRrule, parseRepeatInput } from "@/lib/recurrence";
 import { createRule, endRule, getRule, materializeMeetings } from "@/lib/recurrence-server";
 import { localDateKey } from "@/lib/zoned-time";
@@ -148,8 +149,18 @@ export async function updateMeeting(_prev: MeetingFormState, formData: FormData)
   const { supabase, user } = await requireUser();
   const viewer = await getViewer();
   const row = meetingRow(parsed.data, viewer.timezone);
-  const { error, count } = await supabase.from("meetings").update(row, { count: "exact" }).eq("id", id.data);
-  if (error || count === 0) return { ok: false, message: "No se pudo actualizar la reunión." };
+  const current = await supabase.from("meetings").select("updated_at").eq("id", id.data).maybeSingle();
+  if (current.error || !current.data) return { ok: false, message: "No se pudo actualizar la reunión." };
+  const currentVersion = (current.data as { updated_at: string }).updated_at;
+  const version = readVersion(formData);
+  if (version && Date.parse(currentVersion) !== Date.parse(version)) return { ok: false, message: CONFLICT_MESSAGE };
+  const { error, count } = await supabase
+    .from("meetings")
+    .update(row, { count: "exact" })
+    .eq("id", id.data)
+    .eq("updated_at", currentVersion);
+  if (error) return { ok: false, message: "No se pudo actualizar la reunión." };
+  if (count === 0) return { ok: false, message: CONFLICT_MESSAGE };
 
   const okP = await replaceParticipants(supabase, user.id, id.data, parsed.data.participants);
   const okR = await syncReminder(

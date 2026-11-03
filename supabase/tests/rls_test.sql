@@ -291,4 +291,23 @@ exception when foreign_key_violation then raise notice 'OK: no se puede usar la 
 end $$;
 reset role;
 
+-- 15. Fase 1.6: cambios simultáneos (bloqueo optimista con updated_at)
+select pg_temp.as_user('11111111-1111-1111-1111-111111111111');
+insert into public.tasks (id, user_id, title) values
+  ('aaaaaaaa-0000-0000-0000-000000000030', '11111111-1111-1111-1111-111111111111', 'Editar en dos equipos');
+create temp table v as select updated_at from public.tasks where id = 'aaaaaaaa-0000-0000-0000-000000000030';
+-- Otro dispositivo guarda primero (en otra transacción el reloj avanza)
+select pg_sleep(0.01);
+update public.tasks set title = 'Cambio desde el celular', updated_at = now() + interval '1 second'
+  where id = 'aaaaaaaa-0000-0000-0000-000000000030';
+with u as (
+  update public.tasks set title = 'Cambio desde la tablet'
+  where id = 'aaaaaaaa-0000-0000-0000-000000000030' and updated_at = (select updated_at from v)
+  returning 1
+)
+select pg_temp.check((select count(*) from u) = 0, 'una edición con versión vieja no sobrescribe el cambio de otro dispositivo');
+select pg_temp.check((select title from public.tasks where id = 'aaaaaaaa-0000-0000-0000-000000000030') = 'Cambio desde el celular',
+                     'se conserva el cambio más reciente');
+reset role;
+
 \echo 'TODAS LAS PRUEBAS DE BASE DE DATOS PASARON'

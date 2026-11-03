@@ -23,6 +23,7 @@ export type Meeting = {
   project_id: string | null;
   client_id: string | null;
   created_at: string;
+  updated_at?: string;
   project?: { id: string; name: string; code: string | null } | null;
   client?: { id: string; name: string } | null;
   recurrence_rule_id?: string | null;
@@ -31,7 +32,7 @@ export type Meeting = {
 };
 
 export const MEETING_SELECT =
-  "id, title, description, location, starts_at, ends_at, status, source, project_id, client_id, created_at, project:projects(id, name, code), client:clients(id, name), participants:meeting_participants(id, display_name, contact:contacts(full_name)), recurrence_rule_id, recurrence:recurrence_rules(id, rrule, until_date)";
+  "id, title, description, location, starts_at, ends_at, status, source, project_id, client_id, created_at, updated_at, project:projects(id, name, code), client:clients(id, name), participants:meeting_participants(id, display_name, contact:contacts(full_name)), recurrence_rule_id, recurrence:recurrence_rules(id, rrule, until_date)";
 
 const optionalUuid = z
   .string()

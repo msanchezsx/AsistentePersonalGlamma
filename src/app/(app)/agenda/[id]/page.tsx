@@ -122,6 +122,7 @@ export default async function MeetingPage({
             clients={options.clients}
             defaults={{
               id: meeting.id,
+              version: meeting.updated_at,
               title: meeting.title,
               description: meeting.description ?? "",
               location: meeting.location ?? "",

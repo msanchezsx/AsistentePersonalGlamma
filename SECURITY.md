@@ -13,7 +13,7 @@
 | Validación de datos | Zod en el servidor (correo, ids) + `CHECK` y longitudes en la BD. |
 | Auditoría | `audit_log` con old/new por triggers y eventos de dispositivos. Inmutable vía API. |
 | Variables de entorno | Claves solo en servidor; únicamente la URL y la clave pública de Supabase llevan `NEXT_PUBLIC_`. `.env*` en `.gitignore` (excepto `.env.example`). |
-| Cabeceras HTTP | CSP restrictiva (solo el propio dominio y `*.supabase.co`), `X-Frame-Options: DENY`, HSTS, `nosniff`, `Referrer-Policy`, `Permissions-Policy` (micrófono solo propio), `noindex`. |
+| Cabeceras HTTP | CSP restrictiva (solo el propio dominio y `*.supabase.co`), `X-Frame-Options: DENY`, HSTS, `nosniff`, `Referrer-Policy`, `Permissions-Policy` (sin cámara, micrófono, ubicación ni pagos), `noindex`. |
 | PWA | El service worker no cachea páginas ni respuestas con datos personales; solo estáticos. |
 | Datos de prueba | Solo ficticios (`example.com`, "Cliente Demo"). |
 

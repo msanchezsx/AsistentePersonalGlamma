@@ -118,6 +118,7 @@ export default async function EditTaskPage({
             clients={options.clients}
             defaults={{
               id: task.id,
+              version: task.updated_at,
               title: task.title,
               description: task.description ?? "",
               priority: task.priority,

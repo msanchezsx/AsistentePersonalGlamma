@@ -4,6 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar]
 
+### Agregado (Fase 1.6 — Sincronización entre dispositivos)
+- Las pantallas se actualizan solas al volver a la app, al recuperar la conexión y cada minuto mientras están a la vista (no en formularios, para no interrumpir).
+- Ediciones simultáneas: si una tarea o reunión cambió en otro dispositivo mientras la editabas, no se sobrescribe; se pide recargar (bloqueo optimista con `updated_at`).
+- Aviso "Sin conexión" en la parte superior.
+- `Permissions-Policy`: micrófono desactivado (el dictado es con el teclado).
+
 ### Agregado (Fase 1.5 — Registro por texto y voz)
 - Pantalla **Capturar** (acceso desde Inicio): escribe o dicta una frase como "Junta con Ana mañana a las 10 por 30 minutos".
 - Intérprete en español sin IA ni red (`src/lib/capture.ts`): distingue tarea o reunión, fecha (hoy, mañana, días de la semana, "15 de noviembre", "20/12"), hora (a las 4, 4 pm, de la tarde, mediodía, rangos), duración, participantes, repetición, urgente e importante.
