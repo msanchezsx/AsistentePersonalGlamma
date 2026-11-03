@@ -8,6 +8,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 - Pantalla **Capturar** (acceso desde Inicio): escribe o dicta una frase como "Junta con Ana mañana a las 10 por 30 minutos".
 - Intérprete en español sin IA ni red (`src/lib/capture.ts`): distingue tarea o reunión, fecha (hoy, mañana, días de la semana, "15 de noviembre", "20/12"), hora (a las 4, 4 pm, de la tarde, mediodía, rangos), duración, participantes, repetición, urgente e importante.
 - Dictado con el reconocimiento de voz del navegador (`es-MX`); si no está disponible, se usa el micrófono del teclado.
+- Dictado más robusto: pide permiso del micrófono explícitamente, muestra si el micrófono está abierto o si te escucha, y si en 10 s no llega texto se detiene y sugiere el micrófono del teclado (corrige el caso en que se quedaba "Escuchando…" sin escribir nada).
 - Nada se guarda automáticamente: abre el formulario de tarea o reunión precargado para revisar y confirmar.
 
 ### Agregado (Fase 1.4 — Vistas diaria y semanal)

@@ -13,6 +13,8 @@ type Recognition = {
   continuous: boolean;
   onresult: ((e: SpeechResultEvent) => void) | null;
   onend: (() => void) | null;
+  onaudiostart: (() => void) | null;
+  onspeechstart: (() => void) | null;
   onerror: ((e: { error: string }) => void) | null;
   start: () => void;
   stop: () => void;
@@ -36,6 +38,7 @@ const MIC_ERRORS: Record<string, string> = {
   "service-not-allowed": "No tengo permiso para usar el micrófono. Actívalo en los permisos del navegador para este sitio.",
   "no-speech": "No escuché nada. Toca el micrófono e intenta de nuevo.",
   network: "El dictado necesita internet. Revisa tu conexión.",
+  "audio-capture": "No encontré el micrófono. Revisa que ninguna otra app lo esté usando.",
 };
 
 export function CaptureBox({ todayKey }: { todayKey: string }) {
@@ -44,40 +47,82 @@ export function CaptureBox({ todayKey }: { todayKey: string }) {
   const [listening, setListening] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
   const [supported, setSupported] = useState(false);
+  const [heard, setHeard] = useState<"waiting" | "audio" | "speech">("waiting");
   const recRef = useRef<Recognition | null>(null);
   const baseRef = useRef("");
+  const gotResult = useRef(false);
+  const watchdog = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const textRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => setSupported(Boolean(getRecognition())), []);
-  useEffect(() => () => recRef.current?.stop(), []);
+  useEffect(
+    () => () => {
+      recRef.current?.stop();
+      if (watchdog.current) clearTimeout(watchdog.current);
+    },
+    [],
+  );
+
+  const KEYBOARD_HINT =
+    "No llegó nada del dictado de Chrome en este dispositivo. Toca el cuadro de texto y usa el micrófono de tu teclado (el icono 🎤 del teclado).";
 
   const parsed = useMemo(() => (text.trim() ? parseCapture(text, todayKey) : null), [text, todayKey]);
 
-  function toggleMic() {
+  async function toggleMic() {
     if (listening) {
       recRef.current?.stop();
       return;
     }
     const Ctor = getRecognition();
     if (!Ctor) return;
+    setMicError(null);
+
+    // Pide el permiso del micrófono explícitamente (en la app instalada a veces no aparece solo).
+    try {
+      const stream = await navigator.mediaDevices?.getUserMedia({ audio: true });
+      stream?.getTracks().forEach((tr) => tr.stop());
+    } catch {
+      setMicError(MIC_ERRORS["not-allowed"]);
+      return;
+    }
+
     const rec = new Ctor();
     rec.lang = "es-MX";
     rec.interimResults = true;
     rec.continuous = false;
     baseRef.current = text.trim() ? `${text.trim()} ` : "";
+    gotResult.current = false;
+    setHeard("waiting");
+    rec.onaudiostart = () => setHeard("audio");
+    rec.onspeechstart = () => setHeard("speech");
     rec.onresult = (e) => {
+      gotResult.current = true;
       let transcript = "";
       for (let i = 0; i < e.results.length; i++) transcript += e.results[i][0].transcript;
       setText(baseRef.current + transcript);
     };
-    rec.onerror = (e) => setMicError(MIC_ERRORS[e.error] ?? "No se pudo usar el dictado. Puedes escribir la frase.");
-    rec.onend = () => setListening(false);
-    setMicError(null);
+    rec.onerror = (e) => {
+      if (e.error === "aborted") return;
+      setMicError(MIC_ERRORS[e.error] ?? KEYBOARD_HINT);
+    };
+    rec.onend = () => {
+      setListening(false);
+      if (watchdog.current) clearTimeout(watchdog.current);
+      if (!gotResult.current) {
+        setMicError((prev) => prev ?? KEYBOARD_HINT);
+        textRef.current?.focus();
+      }
+    };
     recRef.current = rec;
     try {
       rec.start();
       setListening(true);
+      // Algunos equipos se quedan "escuchando" sin devolver nada: se corta a los 10 s.
+      watchdog.current = setTimeout(() => {
+        if (!gotResult.current) rec.stop();
+      }, 10000);
     } catch {
-      setMicError("No se pudo iniciar el micrófono.");
+      setMicError(KEYBOARD_HINT);
     }
   }
 
@@ -95,6 +140,7 @@ export function CaptureBox({ todayKey }: { todayKey: string }) {
           Frase
         </label>
         <textarea
+          ref={textRef}
           id="capture"
           rows={3}
           maxLength={500}
@@ -115,7 +161,13 @@ export function CaptureBox({ todayKey }: { todayKey: string }) {
               }`}
             >
               <Icon name="mic" className="size-5" />
-              {listening ? "Escuchando… toca para terminar" : "Dictar"}
+              {listening
+                ? heard === "speech"
+                  ? "Te escucho… toca para terminar"
+                  : heard === "audio"
+                    ? "Micrófono abierto, habla…"
+                    : "Abriendo micrófono…"
+                : "Dictar"}
             </button>
           ) : (
             <p className="text-xs text-muted">
