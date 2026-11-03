@@ -48,3 +48,12 @@ export function DeviceStatusBadge({ status }: { status: keyof typeof STATUS_STYL
     </span>
   );
 }
+
+/** Aviso en formularios precargados desde "Capturar": el usuario revisa antes de guardar. */
+export function CaptureNotice() {
+  return (
+    <p role="status" className="mb-4 rounded-xl bg-accent-soft px-4 py-2.5 text-sm text-accent">
+      Revisa lo que entendí y corrige lo necesario. No se guarda nada hasta que toques el botón de guardar.
+    </p>
+  );
+}

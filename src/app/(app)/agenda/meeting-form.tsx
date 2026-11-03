@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { REMINDER_OPTIONS } from "@/lib/reminders";
 import { RepeatFields } from "@/components/repeat-fields";
+import type { RepeatOption } from "@/lib/recurrence";
 import type { Option } from "@/lib/tasks/types";
 import type { MeetingFormState } from "./actions";
 
@@ -19,6 +20,7 @@ export type MeetingFormDefaults = {
   project_id: string;
   client_id: string;
   reminder: string;
+  repeat?: RepeatOption;
 };
 
 const inputCls =
@@ -82,7 +84,7 @@ export function MeetingForm({
 
       {showRepeat ? (
         <RepeatFields
-          defaultRepeat=""
+          defaultRepeat={defaults.repeat ?? ""}
           defaultUntil=""
           errors={err}
           hint="Se agendan automáticamente las repeticiones de los próximos 60 días y se van agregando más."

@@ -46,7 +46,7 @@ export default async function HomePage() {
 
       {/* Accesos rápidos */}
       <div className="grid grid-cols-3 gap-3">
-        <QuickAction icon="mic" label="Voz" phase={1} />
+        <QuickAction icon="mic" label="Capturar" phase={1} href="/capturar" />
         <QuickAction icon="plus" label="Nueva tarea" phase={1} href="/tareas/nueva" />
         <QuickAction icon="spark" label="Asistente" phase={2} href="/inteligencia" />
       </div>
