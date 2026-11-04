@@ -75,6 +75,7 @@ export const meetingFormSchema = z
       ),
     project_id: optionalUuid,
     client_id: optionalUuid,
+    is_critical: z.boolean(),
   })
   .refine((v) => !v.end_time || v.end_time > v.start_time, {
     message: "La hora de fin debe ser posterior al inicio",
@@ -95,6 +96,7 @@ export function parseMeetingForm(formData: FormData) {
     participants: s("participants"),
     project_id: s("project_id"),
     client_id: s("client_id"),
+    is_critical: formData.get("is_critical") === "on",
   });
 }
 

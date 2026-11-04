@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { TASK_SELECT, type Task } from "@/lib/tasks/model";
 
@@ -7,7 +8,7 @@ export type { Option } from "@/lib/tasks/types";
 import type { Option } from "@/lib/tasks/types";
 
 /** Tareas abiertas + las cerradas en los últimos 14 días. */
-export async function listTasks(): Promise<{ tasks: Task[]; error: boolean }> {
+export const listTasks = cache(async (): Promise<{ tasks: Task[]; error: boolean }> => {
   const supabase = await createClient();
   const since = new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString();
   const { data, error } = await supabase
@@ -17,7 +18,7 @@ export async function listTasks(): Promise<{ tasks: Task[]; error: boolean }> {
     .order("due_at", { ascending: true, nullsFirst: false })
     .limit(500);
   return { tasks: (data as unknown as Task[] | null) ?? [], error: Boolean(error) };
-}
+});
 
 /** Tareas con fecha límite dentro del rango UTC [from, to). */
 export async function listTasksDueInRange(from: string, to: string): Promise<{ tasks: Task[]; error: boolean }> {

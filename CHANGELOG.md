@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar]
 
+### Agregado (avisos críticos, pedido del usuario)
+- **Aviso a pantalla completa** para tareas críticas (prioridad "Crítica" o urgente + importante) y reuniones marcadas como **Reunión crítica**: aparece al llegar su recordatorio, su hora límite (las de todo el día a las 9:00) o 10 minutos antes de la reunión. Botones **Enterado**, **Ya lo realicé** (termina la tarea / marca la reunión como realizada), **Cancelar** (con confirmación) y **Recordar en 10 min**. También lanza un aviso del sistema que no se quita solo y vibra.
+- Migración `20261104000005_meetings_critical.sql`: `meetings.is_critical`. El código tolera que aún no esté aplicada.
+- `listTasks` se cachea por petición (se usa en el layout y en las pantallas).
+
 ### Agregado (Fase 1 — Proyectos, clientes y seguimientos)
 - **Proyectos** (`/proyectos`) con tres secciones:
   - **Seguimientos:** "Yo debo" y "Me deben", con fecha compromiso, persona (existente o nueva), proyecto y cliente; se marcan como cumplidos con un toque. Los vencidos van primero.

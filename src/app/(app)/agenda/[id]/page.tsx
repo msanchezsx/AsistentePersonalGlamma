@@ -5,7 +5,7 @@ import { ConfirmButton } from "@/components/confirm-button";
 import { Card, PageHeader } from "@/components/ui";
 import { formatLongDate, formatTime } from "@/lib/datetime";
 import { MEETING_STATUS_LABELS, participantNames } from "@/lib/meetings/model";
-import { getMeeting } from "@/lib/meetings/queries";
+import { getMeeting, isMeetingCritical } from "@/lib/meetings/queries";
 import { minutesBefore, reminderLabel } from "@/lib/reminders";
 import { getScheduledReminder } from "@/lib/reminders-server";
 import { getViewer } from "@/lib/session";
@@ -31,10 +31,11 @@ export default async function MeetingPage({
   if (!z.string().uuid().safeParse(id).success) notFound();
   const viewer = await getViewer();
   const supabase = await createClient();
-  const [meeting, options, reminder] = await Promise.all([
+  const [meeting, options, reminder, critical] = await Promise.all([
     getMeeting(id),
     listRelationOptions(),
     getScheduledReminder(supabase, { kind: "meeting", id }),
+    isMeetingCritical(id),
   ]);
   if (!meeting) notFound();
 
@@ -133,6 +134,7 @@ export default async function MeetingPage({
               project_id: meeting.project_id ?? "",
               client_id: meeting.client_id ?? "",
               reminder: reminderValue,
+              is_critical: critical,
             }}
           />
         </Card>

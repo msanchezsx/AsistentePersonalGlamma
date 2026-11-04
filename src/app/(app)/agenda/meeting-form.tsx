@@ -22,6 +22,7 @@ export type MeetingFormDefaults = {
   project_id: string;
   client_id: string;
   reminder: string;
+  is_critical?: boolean;
   repeat?: RepeatOption;
 };
 
@@ -103,6 +104,14 @@ export function MeetingForm({
           ))}
         </select>
       </Field>
+
+      <label className="flex items-start gap-3 rounded-xl border border-border px-3.5 py-3">
+        <input type="checkbox" name="is_critical" defaultChecked={defaults.is_critical} className="mt-1 size-5 accent-[var(--danger)]" />
+        <span className="text-sm">
+          <span className="font-medium">Reunión crítica</span>
+          <span className="block text-muted">Te avisa a pantalla completa y pide que confirmes.</span>
+        </span>
+      </label>
 
       <Field label="Participantes (opcional)" error={err.participants} htmlFor="participants">
         <input

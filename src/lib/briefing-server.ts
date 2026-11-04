@@ -4,12 +4,14 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getViewer } from "@/lib/session";
 import { listTasks } from "@/lib/tasks/queries";
-import { listMeetings, listMeetingsInRange } from "@/lib/meetings/queries";
+import { listCriticalMeetingIds, listMeetings, listMeetingsInRange } from "@/lib/meetings/queries";
 import { utcRangeForDays } from "@/lib/planner";
 import { zonedToUtc } from "@/lib/zoned-time";
 import {
   buildAlerts,
   buildBriefing,
+  buildCriticalItems,
+  type CriticalItem,
   briefingKindAt,
   type AlertItem,
   type Briefing,
@@ -89,4 +91,17 @@ export async function loadAlerts(): Promise<{ alerts: AlertItem[]; error: boolea
   const [t, m, r] = await Promise.all([listTasks(), listMeetings({ pastDays: 0, futureDays: 1 }), listUpcomingReminders()]);
   if (t.error || m.error) return { alerts: [], error: true };
   return { alerts: buildAlerts(new Date(), t.tasks, m.meetings, r, viewer.timezone), error: false };
+}
+
+/** Avisos críticos de las próximas 24 h para el aviso a pantalla completa. */
+export async function loadCriticalItems(reminders: ReminderRow[]): Promise<CriticalItem[]> {
+  const viewer = await getViewer();
+  if (viewer.preview || !viewer.id) return [];
+  const [t, m, ids] = await Promise.all([
+    listTasks(),
+    listMeetings({ pastDays: 0, futureDays: 2 }),
+    listCriticalMeetingIds(),
+  ]);
+  if (t.error || m.error) return [];
+  return buildCriticalItems(new Date(), t.tasks, m.meetings, reminders, ids, viewer.timezone);
 }

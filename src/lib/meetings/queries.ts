@@ -53,3 +53,28 @@ export async function listMeetingsInRange(from: string, to: string) {
     .limit(500);
   return { meetings: (data as unknown as Meeting[] | null) ?? [], error: Boolean(error) };
 }
+
+/**
+ * Ids de reuniones críticas. Consulta aparte y tolerante: si la migración
+ * 0005 (is_critical) aún no se aplica, devuelve vacío y nada se rompe.
+ */
+export const listCriticalMeetingIds = cache(async (): Promise<Set<string>> => {
+  const viewer = await getViewer();
+  if (viewer.preview || !viewer.id) return new Set();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("meetings")
+    .select("id")
+    .eq("is_critical", true)
+    .gte("ends_at", new Date(Date.now() - 86400_000).toISOString())
+    .limit(500);
+  if (error) return new Set();
+  return new Set(((data as { id: string }[] | null) ?? []).map((r) => r.id));
+});
+
+/** ¿Esta reunión es crítica? (falso si la columna aún no existe). */
+export async function isMeetingCritical(id: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("meetings").select("is_critical").eq("id", id).maybeSingle();
+  return !error && Boolean((data as { is_critical?: boolean } | null)?.is_critical);
+}

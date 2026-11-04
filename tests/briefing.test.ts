@@ -146,3 +146,40 @@ describe("alertas", () => {
     expect(reminderUrl({ task_id: null, meeting_id: null })).toBe("/agenda");
   });
 });
+
+import { buildCriticalItems, isCriticalTask } from "@/lib/briefing";
+
+describe("avisos críticos", () => {
+  it("define tarea crítica", () => {
+    expect(isCriticalTask({ priority: 1, is_urgent: false, is_important: false })).toBe(true);
+    expect(isCriticalTask({ priority: 3, is_urgent: true, is_important: true })).toBe(true);
+    expect(isCriticalTask({ priority: 2, is_urgent: true, is_important: false })).toBe(false);
+  });
+
+  it("tareas y reuniones críticas con su momento de aviso", () => {
+    const items = buildCriticalItems(
+      NOW, // 09:00 local
+      [
+        task("critica-hora", "2026-11-04T20:00:00Z", { priority: 1 }),
+        task("critica-dia", "2026-11-05T05:59:59Z", { is_urgent: true, is_important: true, due_all_day: true }),
+        task("normal", "2026-11-04T16:00:00Z"),
+        task("critica-lejos", "2026-11-08T20:00:00Z", { priority: 1 }),
+        task("critica-hecha", "2026-11-04T16:00:00Z", { priority: 1, status: "done" }),
+      ],
+      [
+        meeting("junta-critica", "2026-11-04T17:00:00Z", "2026-11-04T18:00:00Z", { location: "Planta" }),
+        meeting("junta-normal", "2026-11-04T17:00:00Z", "2026-11-04T18:00:00Z"),
+      ],
+      [{ id: "r1", title: "x", remind_at: "2026-11-04T19:30:00Z", task_id: "critica-hora", meeting_id: null }],
+      new Set(["junta-critica"]),
+      TZ,
+    );
+    expect(items.map((i) => [i.id, i.showAt, i.reminderId])).toEqual([
+      ["critica-dia", "2026-11-04T15:00:00.000Z", null],
+      ["junta-critica", "2026-11-04T16:50:00.000Z", null],
+      ["critica-hora", "2026-11-04T19:30:00.000Z", "r1"],
+    ]);
+    expect(items[1].detail).toBe("Reunión crítica a las 11:00 a.m. · Planta");
+    expect(items[2].detail).toBe("Tarea crítica: vence a las 02:00 p.m.");
+  });
+});

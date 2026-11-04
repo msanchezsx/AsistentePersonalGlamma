@@ -8,6 +8,7 @@ PostgreSQL en Supabase. Migraciones en `supabase/migrations/` (se aplican en ord
 | `20261103000002_tasks_all_day.sql` | `tasks.due_all_day`: fecha límite sin hora (Fase 1.1) |
 | `20261103000003_recurrences.sql` | `recurrence_rules.applies_to` (task/meeting), `recurrence_rules.reminder_minutes` e índices únicos `(recurrence_rule_id, starts_at)` en meetings y `(recurrence_rule_id, due_at)` en tasks (Fase 1.3) |
 | `20261103000004_assistant.sql` | Asistente: `assistant_conversations`, `assistant_messages` (solo inserción), `assistant_actions` (propuestas con confirmación) (Fase 2) |
+| `20261104000005_meetings_critical.sql` | `meetings.is_critical`: reunión crítica con aviso a pantalla completa |
 
 ## Convenciones
 

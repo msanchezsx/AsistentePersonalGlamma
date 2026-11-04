@@ -7,7 +7,7 @@ import { DEFAULT_TIMEZONE } from "@/lib/constants";
 import { isActiveMeeting, participantNames, type Meeting } from "@/lib/meetings/model";
 import { freeSlots, formatClock, formatMinutes } from "@/lib/planner";
 import { compareTasks, isOpen, isOverdue, type Task } from "@/lib/tasks/model";
-import { addDaysKey, localDateKey, localTimeKey } from "@/lib/zoned-time";
+import { addDaysKey, localDateKey, localTimeKey, zonedToUtc } from "@/lib/zoned-time";
 
 export type BriefingKind = "morning" | "closing";
 
@@ -279,4 +279,87 @@ export function briefingScript(b: Briefing, name: string | null, timeZone: strin
 
 function isUrgentImportant(t: Task) {
   return t.is_urgent && t.is_important;
+}
+
+// ---------------------------------------------------------------- avisos críticos
+
+export type CriticalItem = {
+  key: string;
+  kind: "task" | "meeting";
+  id: string;
+  title: string;
+  detail: string;
+  /** Cuándo debe aparecer el aviso a pantalla completa. */
+  showAt: string;
+  url: string;
+  reminderId: string | null;
+};
+
+/** Tarea crítica: prioridad 1 ("Crítica") o urgente + importante. */
+export function isCriticalTask(t: Pick<Task, "priority" | "is_urgent" | "is_important">): boolean {
+  return t.priority === 1 || (t.is_urgent && t.is_important);
+}
+
+/**
+ * Avisos a pantalla completa de las próximas 24 h (y los que ya llegaron):
+ * - Tarea crítica abierta: al llegar su recordatorio o su hora límite (las de
+ *   todo el día, a las 9:00).
+ * - Reunión crítica programada: al llegar su recordatorio o 10 min antes.
+ * La llave incluye el momento, así que si la fecha cambia vuelve a avisar.
+ */
+export function buildCriticalItems(
+  now: Date,
+  tasks: Task[],
+  meetings: Meeting[],
+  reminders: ReminderRow[],
+  criticalMeetingIds: Set<string>,
+  timeZone: string = DEFAULT_TIMEZONE,
+): CriticalItem[] {
+  const horizon = now.getTime() + 24 * 3600_000;
+  const out: CriticalItem[] = [];
+  const firstReminder = (field: "task_id" | "meeting_id", id: string) =>
+    reminders.filter((r) => r[field] === id).sort((a, b) => a.remind_at.localeCompare(b.remind_at))[0] ?? null;
+
+  for (const t of tasks) {
+    if (!isOpen(t) || !t.due_at || !isCriticalTask(t)) continue;
+    const dueMoment = t.due_all_day
+      ? zonedToUtc(localDateKey(new Date(t.due_at), timeZone), "09:00", timeZone)
+      : new Date(t.due_at);
+    const r = firstReminder("task_id", t.id);
+    const show = r && new Date(r.remind_at) < dueMoment ? new Date(r.remind_at) : dueMoment;
+    if (show.getTime() > horizon) continue;
+    const time = t.due_all_day ? "hoy" : `a las ${formatClock(localTimeKey(new Date(t.due_at), timeZone))}`;
+    out.push({
+      key: `task:${t.id}:${show.toISOString()}`,
+      kind: "task",
+      id: t.id,
+      title: t.title,
+      detail: isOverdue(t, now) ? `Tarea crítica vencida (${shortDate(localDateKey(new Date(t.due_at), timeZone))})` : `Tarea crítica: vence ${time}`,
+      showAt: show.toISOString(),
+      url: `/tareas/${t.id}`,
+      reminderId: r?.id ?? null,
+    });
+  }
+
+  for (const m of meetings) {
+    if (m.status !== "scheduled" || !criticalMeetingIds.has(m.id)) continue;
+    if (new Date(m.ends_at) <= now) continue;
+    const start = new Date(m.starts_at);
+    const r = firstReminder("meeting_id", m.id);
+    const tenBefore = new Date(start.getTime() - 10 * 60000);
+    const show = r && new Date(r.remind_at) < tenBefore ? new Date(r.remind_at) : tenBefore;
+    if (show.getTime() > horizon) continue;
+    const who = participantNames(m);
+    out.push({
+      key: `meeting:${m.id}:${show.toISOString()}`,
+      kind: "meeting",
+      id: m.id,
+      title: m.title,
+      detail: `Reunión crítica a las ${formatClock(localTimeKey(start, timeZone))}${who.length ? ` con ${listJoin(who)}` : ""}${m.location ? ` · ${m.location}` : ""}`,
+      showAt: show.toISOString(),
+      url: `/agenda/${m.id}`,
+      reminderId: r?.id ?? null,
+    });
+  }
+  return out.sort((a, b) => a.showAt.localeCompare(b.showAt));
 }

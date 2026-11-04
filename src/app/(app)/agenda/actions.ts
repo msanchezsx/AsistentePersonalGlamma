@@ -50,6 +50,14 @@ async function replaceParticipants(supabase: Supa, userId: string, meetingId: st
   return !ins.error;
 }
 
+/**
+ * Marca de reunión crítica. Va aparte del resto de los datos para que, si la
+ * migración 0005 aún no se aplica, la reunión se guarde igual.
+ */
+async function setMeetingCritical(supabase: Awaited<ReturnType<typeof createClient>>, id: string, critical: boolean) {
+  await supabase.from("meetings").update({ is_critical: critical }).eq("id", id);
+}
+
 function meetingRow(v: MeetingFormValues, timeZone: string) {
   return {
     title: v.title,
@@ -122,6 +130,7 @@ export async function createMeeting(_prev: MeetingFormState, formData: FormData)
     }
   }
 
+  await setMeetingCritical(supabase, data.id, parsed.data.is_critical);
   const okP = await replaceParticipants(supabase, user.id, data.id, parsed.data.participants);
   const okR = await syncReminder(
     supabase,
@@ -162,6 +171,7 @@ export async function updateMeeting(_prev: MeetingFormState, formData: FormData)
   if (error) return { ok: false, message: "No se pudo actualizar la reunión." };
   if (count === 0) return { ok: false, message: CONFLICT_MESSAGE };
 
+  await setMeetingCritical(supabase, id.data, parsed.data.is_critical);
   const okP = await replaceParticipants(supabase, user.id, id.data, parsed.data.participants);
   const okR = await syncReminder(
     supabase,

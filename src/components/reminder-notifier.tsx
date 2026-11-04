@@ -30,12 +30,26 @@ function markShown(id: string): boolean {
 }
 
 /** Muestra un aviso del sistema (si hay permiso) o uno dentro de la app. */
-export async function showSystemNotification(title: string, body: string, url: string, tag: string): Promise<boolean> {
+export async function showSystemNotification(
+  title: string,
+  body: string,
+  url: string,
+  tag: string,
+  opts: { critical?: boolean } = {},
+): Promise<boolean> {
   if (typeof Notification === "undefined" || Notification.permission !== "granted") return false;
   try {
     const reg = await navigator.serviceWorker?.ready;
     if (reg) {
-      await reg.showNotification(title, { body, tag, icon: "/icons/caja-192.png", badge: "/icons/caja-192.png", data: { url } });
+      await reg.showNotification(title, {
+        body,
+        tag,
+        icon: "/icons/caja-192.png",
+        badge: "/icons/caja-192.png",
+        data: { url },
+        // Los críticos se quedan en pantalla hasta que el usuario los atiende.
+        requireInteraction: Boolean(opts.critical),
+      });
       return true;
     }
     new Notification(title, { body, tag, icon: "/icons/caja-192.png" });
