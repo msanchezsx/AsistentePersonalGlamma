@@ -123,14 +123,18 @@ body {
   background-color: #c68a4d;
 }
 .splash-title {
+  /* abajo, donde Android pone el nombre; la caja queda centrada como su icono */
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom) + 3.5rem);
   font-size: 1.125rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--muted);
 }
 @keyframes splash-spin {
-  from { transform: rotateX(-22deg) rotateY(0deg); }
-  to { transform: rotateX(-22deg) rotateY(360deg); }
+  /* empieza en la misma vista que el icono de Android (scripts/generate-icons.mjs) */
+  from { transform: rotateX(-22deg) rotateY(35deg); }
+  to { transform: rotateX(-22deg) rotateY(395deg); }
 }
 @keyframes splash-out {
   to { opacity: 0; visibility: hidden; }
