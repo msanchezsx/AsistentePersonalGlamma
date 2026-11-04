@@ -5,7 +5,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 ## [Sin publicar]
 
 ### Cambiado (pantalla de arranque)
-- Icono = la misma caja 3D de la animación de arranque en su primer cuadro, sin cuadro azul: transparente (`any`) o sobre `#f6f7f9` (`maskable`); `theme_color` `#f6f7f9`. La animación empieza en ese mismo ángulo, con la caja centrada y el nombre abajo como en Android, así el arranque del sistema (que Android siempre muestra) se ve como la caja quieta que empieza a girar. Service worker `v7`. Requiere reinstalar la app.
+- Icono = la misma caja 3D de la animación de arranque en su primer cuadro, sin cuadro azul: transparente (`any`) o sobre `#f6f7f9` (`maskable`); `theme_color` `#f6f7f9`. La animación empieza en ese mismo ángulo, con la caja centrada y el nombre abajo como en Android, así el arranque del sistema (que Android siempre muestra) se ve como la caja quieta que empieza a girar. La caja ahora rebota con una sombra mientras gira y crece un poco al desaparecer. Service worker `v7`. Requiere reinstalar la app.
 
 ### Agregado (Fase 4 — Avisos con la app cerrada)
 - Web Push: `/api/cron/avisos` (protegido con `CRON_SECRET`, comparación en tiempo constante) envía recordatorios y avisos críticos que llegaron en los últimos 30 min. Se registra cada envío en `notifications` con llave única antes de enviar: no hay duplicados aunque el programador se repita. Suscripciones vencidas se borran.

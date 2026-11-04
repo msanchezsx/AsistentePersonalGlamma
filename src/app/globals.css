@@ -86,6 +86,24 @@ body {
   background: var(--bg);
   animation: splash-out 0.45s ease 1.8s forwards;
 }
+.splash-stage {
+  position: relative;
+  /* sube y baja mientras gira; en el primer cuadro está quieta, igual que el icono */
+  animation: splash-hop 1.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.splash-shadow {
+  position: absolute;
+  left: 50%;
+  top: 128px;
+  width: 92px;
+  height: 14px;
+  margin-left: -46px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.28), transparent);
+  animation:
+    splash-fade-in 0.35s ease both,
+    splash-shadow 1.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
 .splash-scene {
   width: 96px;
   height: 96px;
@@ -136,9 +154,28 @@ body {
   from { transform: rotateX(-22deg) rotateY(35deg); }
   to { transform: rotateX(-22deg) rotateY(395deg); }
 }
+@keyframes splash-hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+@keyframes splash-shadow {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(0.7); }
+}
+@keyframes splash-fade-in {
+  from { opacity: 0; }
+}
 @keyframes splash-out {
   to { opacity: 0; visibility: hidden; }
 }
+.splash-out-cube {
+  position: relative;
+  animation: splash-grow 0.45s ease 1.8s forwards;
+}
+@keyframes splash-grow {
+  to { transform: scale(1.25); }
+}
 @media (prefers-reduced-motion: reduce) {
   .splash-cube { animation: none; transform: rotateX(-22deg) rotateY(35deg); }
+  .splash-stage, .splash-shadow, .splash-out-cube { animation: none; }
 }
