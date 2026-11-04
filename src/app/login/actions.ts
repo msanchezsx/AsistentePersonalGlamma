@@ -4,6 +4,7 @@ import { z } from "zod";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicEnv, isEmailAllowed } from "@/lib/env";
+import { loginErrorMessage } from "@/lib/login-errors";
 
 export type LoginState = { ok: boolean; message: string } | null;
 
@@ -32,8 +33,9 @@ export async function requestMagicLink(_prev: LoginState, formData: FormData): P
       emailRedirectTo: `${origin}/auth/callback`,
     },
   });
-  if (error && error.status !== 422 && error.status !== 400) {
-    return { ok: false, message: "No se pudo enviar el enlace. Intenta de nuevo en unos minutos." };
+  if (error) {
+    const message = loginErrorMessage(error);
+    if (message) return { ok: false, message };
   }
   return genericOk;
 }

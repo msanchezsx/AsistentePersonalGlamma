@@ -7,7 +7,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Todo excepto archivos estáticos, iconos, manifest y service worker.
-    "/((?!_next/static|_next/image|icons/|favicon.ico|manifest.webmanifest|sw.js|robots.txt).*)",
+    // Todo excepto archivos estáticos, iconos, logo, manifest y service worker
+    // (el logo se ve en la pantalla de inicio de sesión, antes de entrar).
+    "/((?!_next/static|_next/image|icons/|brand/|favicon.ico|manifest.webmanifest|sw.js|robots.txt).*)",
   ],
 };

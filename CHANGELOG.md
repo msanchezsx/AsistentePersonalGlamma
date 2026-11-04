@@ -4,6 +4,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar]
 
+### Corregido
+- El logo de Glama salía roto en la pantalla de inicio de sesión: el middleware redirigía `/brand/*` al login para usuarios sin sesión. Ahora `/brand/` se sirve como archivo estático (verificado: antes 307, ahora 200).
+- Al pedir el enlace de acceso, el límite de envío de correos de Supabase se mostraba como un error genérico. Ahora se explica (esperar ~1 hora, o 1 minuto entre solicitudes).
+
 ### Agregado (Fase 7 — Compartir desde WhatsApp)
 - La app aparece en el menú **Compartir** de Android (Web Share Target en el manifest). Pantalla `/compartir`: muestra el mensaje, quita el encabezado de WhatsApp ("[fecha] Nombre:"), y ofrece **Crear tarea**, **Crear reunión** (formularios precargados con el texto como descripción) o **Guardar como nota** (`communications`, canal `whatsapp`). Nada se guarda sin elegir una opción. Sin scraping ni acceso a WhatsApp.
 
