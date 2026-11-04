@@ -4,9 +4,9 @@
  *   - Solo se guardan en caché recursos estáticos públicos (JS/CSS/iconos).
  *   - Las páginas y la API van siempre a la red (no se cachean datos personales).
  *   - Si no hay red al navegar, se muestra /offline.
- * Las notificaciones push se agregan en la Fase 4.
+ * Fase 4: al tocar un aviso de recordatorio se abre (o enfoca) la app en su pantalla.
  */
-const VERSION = "v4";
+const VERSION = "v5";
 const STATIC_CACHE = `ae-static-${VERSION}`;
 const PRECACHE = ["/offline", "/icons/caja-192.png", "/icons/caja-512.png"];
 
@@ -51,4 +51,22 @@ self.addEventListener("fetch", (event) => {
       ),
     );
   }
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const raw = (event.notification.data && event.notification.data.url) || "/";
+  // Solo rutas internas.
+  const url = typeof raw === "string" && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+      for (const w of wins) {
+        if ("focus" in w) {
+          w.navigate(url);
+          return w.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    }),
+  );
 });

@@ -4,12 +4,12 @@
 |---|---|
 | 0. Preparación técnica | 🟢 Desplegada en producción; pendiente prueba de autorización del celular |
 | 1. Agenda inteligente | 🟢 Completa (1.6 pendiente de prueba del usuario) |
-| 2. Inteligencia artificial | 🟡 Publicada; falta migración 0004 y clave de Claude (aprobada 2026-11-03) |
-| 3. Outlook | ⏸ |
-| 4. Automatizaciones | ⏸ |
-| 5. Podcast | ⏸ |
-| 6. Inteligencia y productividad | ⏸ |
-| 7. WhatsApp | ⏸ |
+| 2. Inteligencia artificial | 🟡 Publicada y migración aplicada; pendiente la clave de Claude (de pago, el usuario la pospuso) |
+| 3. Outlook | ⏸ Pospuesta: falta registrar la app en Azure (guía en docs/GUIA-OUTLOOK-AZURE.md) |
+| 4. Automatizaciones | 🟡 Publicada sin servicios externos; falta prueba del usuario. Push con app cerrada y n8n pendientes |
+| 5. Podcast | 🟡 Publicada con voz del equipo; falta prueba del usuario |
+| 6. Inteligencia y productividad | 🟡 Publicada; falta prueba del usuario |
+| 7. WhatsApp | 🟡 Publicada (compartir); falta prueba del usuario |
 | 8. Puesta en producción | ⏸ |
 
 ## Fase 0 — Diagnóstico del entorno (2026-11-03)
@@ -87,6 +87,17 @@ Nota: no hay acceso de red desde el entorno de desarrollo a Supabase, por lo que
 
 Pendiente del usuario: ejecutar `20261103000004_assistant.sql` en Supabase y agregar `ANTHROPIC_API_KEY`; después probar en la tablet.
 
+## Fases 4 a 7 — Actividades (2026-11-04, sin costo ni cuentas nuevas)
+
+| Fase | Entregado | Validación |
+|---|---|---|
+| 4 | Resumen de la mañana, cierre del día, pasar pendientes a mañana, alertas en Inicio, avisos de recordatorios en el equipo | 100 pruebas unitarias, build OK. Sin migración |
+| 5 | Podcast con voz del equipo e historial de 7 días | Idem |
+| 6 | Dashboard, recomendaciones, análisis de problemas (5 porqués, Ishikawa, plan de acción) | Idem |
+| 7 | Compartir desde WhatsApp → tarea, reunión o nota | Idem |
+
+Pendientes que requieren servicios externos o decisión del usuario: clave de Claude (Fase 2), Azure para Outlook (Fase 3), avisos con la app cerrada y n8n (Fase 4), voz de mayor calidad (TTS de pago, Fase 5).
+
 ## Siguiente actividad
 
-Prueba de la Fase 2 por el usuario. Después, Fase 3 (Outlook), que requiere registrar una aplicación en Azure.
+Prueba de las Fases 4–7 por el usuario en la tablet. Después, Fase 8 (pruebas integrales, revisión de seguridad, instalación en el celular y documentación final).

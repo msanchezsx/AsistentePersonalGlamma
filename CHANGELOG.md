@@ -4,6 +4,24 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar]
 
+### Agregado (Fase 7 — Compartir desde WhatsApp)
+- La app aparece en el menú **Compartir** de Android (Web Share Target en el manifest). Pantalla `/compartir`: muestra el mensaje, quita el encabezado de WhatsApp ("[fecha] Nombre:"), y ofrece **Crear tarea**, **Crear reunión** (formularios precargados con el texto como descripción) o **Guardar como nota** (`communications`, canal `whatsapp`). Nada se guarda sin elegir una opción. Sin scraping ni acceso a WhatsApp.
+
+### Agregado (Fase 6 — Dashboard e inteligencia de productividad)
+- **Dashboard** (`/dashboard`): tareas abiertas, vencidas, que vencen esta semana, % terminadas a tiempo; barras de tareas terminadas, nuevas y horas en reuniones por semana (6 semanas, con vista de tabla); matriz urgente/importante; recomendaciones por reglas explícitas (`src/lib/metrics.ts`).
+- **Análisis de problemas** (`/dashboard/incidencias`): registrar un problema, hechos, 5 porqués, Ishikawa (6M), causa raíz, recomendaciones y plan de acción (contención, correctiva, preventiva) con responsable, fecha y avance. Indica qué falta para un análisis completo.
+- Sin nuevas dependencias (gráficas en HTML/CSS) y sin migración (tablas `incidents` y `solutions` de la Fase 0).
+
+### Agregado (Fase 5 — Podcast)
+- **Podcast** (`/podcast`): guion del resumen de la mañana o del cierre del día, leído con la voz del propio equipo (síntesis de voz del navegador: sin servicio externo ni costo). Reproducir, pausa, párrafo anterior/siguiente, velocidad. Historial de los últimos 7 días (se arma con los datos de ese día).
+
+### Agregado (Fase 4 — Automatizaciones sin servidor externo)
+- **Resumen de la mañana y cierre del día** (`/resumen` y tarjeta en Inicio): reuniones, prioridades (urgente+importante primero), tiempo libre, alertas (vencidas, día cargado, reuniones empalmadas), terminadas hoy, pendientes y lo de mañana. Cambia a cierre después de `day_close_time` (16:45).
+- Cierre: botón **Pasar pendientes a mañana** (con confirmación) que recorre fecha y recordatorios a la misma hora.
+- **Alertas** en Inicio: recordatorios que ya llegaron (botón "Listo"), reuniones que empiezan en 15 min y tareas vencidas; una llave por origen evita duplicados.
+- **Avisos de recordatorios** en el equipo mientras la app está abierta o en segundo plano (Configuración → Avisos → Activar). Al tocar el aviso se abre la tarea o reunión. Service worker `v5`.
+- Pendiente: avisos con la app cerrada (Web Push + tarea programada en servidor) y n8n; requieren servicios externos.
+
 ### Agregado (Fase 2 — Asistente con inteligencia artificial)
 - Pantalla **Asistente** (`/inteligencia`): conversación con Claude (Claude API, modelo `claude-opus-5-5` por omisión) con historial de conversaciones.
 - El asistente consulta datos reales con herramientas: agenda de un rango de fechas, búsqueda de tareas (abiertas, cerradas, vencidas) y memoria.

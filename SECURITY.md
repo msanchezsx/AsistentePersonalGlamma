@@ -16,6 +16,7 @@
 | Cabeceras HTTP | CSP restrictiva (solo el propio dominio y `*.supabase.co`), `X-Frame-Options: DENY`, HSTS, `nosniff`, `Referrer-Policy`, `Permissions-Policy` (sin cámara, micrófono, ubicación ni pagos), `noindex`. |
 | PWA | El service worker no cachea páginas ni respuestas con datos personales; solo estáticos. |
 | Asistente (Fase 2) | `ANTHROPIC_API_KEY` solo en el servidor (Secret en Vercel, sin `NEXT_PUBLIC_`); el navegador nunca llama a Claude. Las herramientas de escritura solo crean propuestas en `assistant_actions` (lista blanca por `CHECK`); se ejecutan únicamente cuando el usuario toca Confirmar, con bloqueo para que un doble toque no ejecute dos veces. Las entradas de las herramientas se validan con Zod. No hay herramientas para enviar correos o mensajes, ni para borrar datos. El historial de mensajes no se puede editar. |
+| Avisos y compartir (Fases 4 y 7) | Los avisos se generan en el propio equipo con datos ya visibles para el usuario; el service worker solo abre rutas internas al tocar un aviso. Lo compartido llega por URL, se limita en tamaño, los enlaces solo se aceptan `http(s)` y nada se guarda sin una acción del usuario. Sin acceso a WhatsApp ni scraping. |
 | Datos de prueba | Solo ficticios (`example.com`, "Cliente Demo"). |
 
 ## Riesgos residuales conocidos

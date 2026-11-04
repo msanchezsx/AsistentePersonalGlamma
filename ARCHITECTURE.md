@@ -70,6 +70,22 @@
 - `src/lib/assistant/execute.ts`: ejecuta una propuesta solo desde la acción de servidor `decideAction`, tras la confirmación del usuario.
 - Todas las consultas usan la sesión del usuario (RLS), nunca la clave de servicio.
 
+## Resúmenes, alertas y podcast (Fases 4 y 5)
+
+- `src/lib/briefing.ts` (puro, probado): `buildBriefing` (mañana/cierre), `buildAlerts` y `briefingScript` (guion en párrafos). `src/lib/briefing-server.ts` carga los datos con la sesión del usuario.
+- Se calculan al abrir la pantalla en lugar de guardarse en `daily_summaries`: no se requiere la clave de servicio ni un proceso programado, y siempre reflejan los datos actuales.
+- Avisos: `ReminderNotifier` (en el layout) programa en el equipo los recordatorios de las próximas 24 h y los muestra con `registration.showNotification`; `localStorage` evita repetirlos. Con la app cerrada no hay aviso (requiere Web Push desde un servidor programado; pendiente).
+- Podcast: `speechSynthesis` del navegador, un párrafo por enunciado (Chrome para Android corta textos largos).
+
+## Dashboard y análisis de problemas (Fase 6)
+
+- `src/lib/metrics.ts` (puro, probado): series semanales (lunes a domingo, zona del usuario), % a tiempo, matriz urgente/importante y recomendaciones por reglas con umbrales explícitos.
+- `src/lib/incidents.ts`: formato de `incidents.analysis` (ver DATABASE.md) y verificación de análisis incompleto.
+
+## Compartir (Fase 7)
+
+- `share_target` (GET) en `src/app/manifest.ts` → `/compartir`. `src/lib/share.ts` limpia el texto (encabezados de WhatsApp, enlaces solo http/https). El usuario elige qué crear.
+
 ## Preparación para fases futuras
 
 - El esquema ya incluye las tablas de todas las fases (correos, notificaciones con deduplicación, suscripciones push por dispositivo, resúmenes, podcasts, incidencias, memoria) para no rehacer el modelo, pero **no hay lógica de esas fases implementada**.

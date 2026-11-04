@@ -25,7 +25,7 @@ export default async function NewTaskPage({ searchParams }: { searchParams: Prom
           clients={clients}
           defaults={{
             title: pre.title,
-            description: "",
+            description: pre.description,
             priority: 3,
             is_urgent: pre.urgent,
             is_important: pre.important,

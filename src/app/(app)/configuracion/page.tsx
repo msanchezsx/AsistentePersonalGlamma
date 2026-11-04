@@ -7,6 +7,7 @@ import { getViewer } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { DeviceActions } from "./device-actions";
 import { NameForm } from "./name-form";
+import { NotificationsSetting } from "./notifications-setting";
 
 export const metadata: Metadata = { title: "Configuración" };
 export const dynamic = "force-dynamic";
@@ -69,6 +70,10 @@ export default async function ConfigPage() {
           <div className="mt-4">
             <NameForm defaultName={viewer.displayName ?? ""} />
           </div>
+        </Card>
+
+        <Card title="Avisos">
+          <NotificationsSetting />
         </Card>
 
         <Card title="Jornada laboral">

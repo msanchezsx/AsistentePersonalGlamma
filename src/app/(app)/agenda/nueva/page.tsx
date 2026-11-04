@@ -27,7 +27,7 @@ export default async function NewMeetingPage({ searchParams }: { searchParams: P
           clients={clients}
           defaults={{
             title: pre.title.slice(0, 200),
-            description: "",
+            description: pre.description,
             location: "",
             date: pre.date || localDateKey(new Date(), viewer.timezone),
             start_time: pre.time,

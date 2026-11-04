@@ -11,16 +11,12 @@ import { TaskItem } from "./tareas/task-item";
 import { MeetingItem } from "./agenda/meeting-item";
 import { isActiveMeeting, type Meeting } from "@/lib/meetings/model";
 import { listMeetings } from "@/lib/meetings/queries";
+import { loadAlerts, loadBriefing } from "@/lib/briefing-server";
+import { dismissReminder } from "./resumen/actions";
 
 export const dynamic = "force-dynamic";
 
 const SECTIONS = [
-  {
-    title: "Resumen ejecutivo",
-    phase: 4,
-    text: "El resumen de inicio de jornada se generará automáticamente a partir de tu agenda, tareas y correos.",
-  },
-  { title: "Alertas", phase: 4, text: "Actividades vencidas y compromisos próximos a vencer." },
   { title: "Seguimientos", phase: 1, text: "Seguimientos y compromisos abiertos con clientes y colaboradores." },
 ];
 
@@ -57,8 +53,10 @@ export default async function HomePage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        {SECTIONS.map((s, i) => (
-          <Card key={s.title} className={i === 0 ? "lg:col-span-2" : ""}>
+        <ExecutiveSummary />
+        <Alerts />
+        {SECTIONS.map((s) => (
+          <Card key={s.title} className="lg:col-span-2">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">{s.title}</h2>
               <PhaseBadge phase={s.phase} />
@@ -173,6 +171,82 @@ async function UpcomingMeetings({ preview, timeZone, now }: { preview: boolean; 
         <ul className="divide-y divide-border">
           {items.map((m) => (
             <MeetingItem key={m.id} meeting={m} now={now} timeZone={timeZone} />
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+/** Resumen de la mañana o cierre del día (según la hora de cierre configurada). */
+async function ExecutiveSummary() {
+  const { briefing: b, error } = await loadBriefing();
+  return (
+    <Card>
+      <div className="mb-2 flex items-center justify-between">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
+          {b?.kind === "closing" ? "Cierre del día" : "Resumen ejecutivo"}
+        </h2>
+        <Link href="/resumen" className="text-sm font-medium text-accent">
+          Ver resumen
+        </Link>
+      </div>
+      {error || !b ? (
+        <EmptyState>No se pudo armar el resumen.</EmptyState>
+      ) : (
+        <>
+          <p className="font-medium">{b.headline}</p>
+          {b.kind === "morning" && b.priorities.length ? (
+            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
+              {b.priorities.map((t) => (
+                <li key={t.id}>
+                  <Link href={`/tareas/${t.id}`} className="hover:text-accent">
+                    {t.title}
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          ) : null}
+          <Link href="/podcast" className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-accent">
+            <Icon name="headphones" className="size-4" />
+            Escuchar resumen
+          </Link>
+        </>
+      )}
+    </Card>
+  );
+}
+
+/** Recordatorios que ya llegaron, reuniones por empezar y tareas vencidas. */
+async function Alerts() {
+  const { alerts, error } = await loadAlerts();
+  return (
+    <Card>
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted">Alertas</h2>
+      {error ? (
+        <EmptyState>No se pudieron cargar las alertas.</EmptyState>
+      ) : alerts.length === 0 ? (
+        <EmptyState>Sin alertas por ahora.</EmptyState>
+      ) : (
+        <ul className="divide-y divide-border">
+          {alerts.slice(0, 6).map((a) => (
+            <li key={a.key} className="flex items-center gap-3 py-2.5">
+              <span
+                className={`size-2 shrink-0 rounded-full ${a.kind === "overdue" ? "bg-danger" : a.kind === "meeting" ? "bg-accent" : "bg-warn"}`}
+              />
+              <Link href={a.url} className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{a.title}</p>
+                <p className="text-xs text-muted">{a.body}</p>
+              </Link>
+              {a.reminderId ? (
+                <form action={dismissReminder}>
+                  <input type="hidden" name="id" value={a.reminderId} />
+                  <button type="submit" className="rounded-lg border border-border px-2.5 py-1 text-xs">
+                    Listo
+                  </button>
+                </form>
+              ) : null}
+            </li>
           ))}
         </ul>
       )}

@@ -8,6 +8,7 @@ export function readPrefill(sp: Record<string, string | undefined>) {
   const repeat: RepeatOption = isRepeatOption(sp.repetir ?? "") ? (sp.repetir as RepeatOption) : "";
   return {
     title: str("titulo", 300),
+    description: str("desc", 4000),
     date,
     time: time("hora"),
     end: time("fin"),
