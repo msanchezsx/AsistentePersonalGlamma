@@ -7,7 +7,7 @@
  * Fase 4: al tocar un aviso de recordatorio se abre (o enfoca) la app en su pantalla.
  * Fase 4: avisos con la app cerrada (Web Push enviado por /api/cron/avisos).
  */
-const VERSION = "v7";
+const VERSION = "v8";
 const STATIC_CACHE = `ae-static-${VERSION}`;
 const PRECACHE = ["/offline", "/icons/caja-192.png", "/icons/caja-512.png"];
 

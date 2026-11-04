@@ -16,10 +16,11 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["productivity", "business"],
     // Fase 7: aparece en "Compartir" de Android (WhatsApp y otras apps).
     share_target: { action: "/compartir", method: "GET", params: { title: "title", text: "text", url: "url" } },
+    // Solo 144 px a propósito: más chico que el mínimo de Chrome para la pantalla de
+    // arranque en celulares, así Android no muestra imagen antes de la caja girando.
     icons: [
-      { src: "/icons/caja-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/icons/caja-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: "/icons/caja-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/icons/caja-144.png", sizes: "144x144", type: "image/png", purpose: "any" },
+      { src: "/icons/caja-maskable-144.png", sizes: "144x144", type: "image/png", purpose: "maskable" },
     ],
   };
 }
