@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "standalone",
     orientation: "any", // celular vertical y tablet horizontal
     background_color: "#f6f7f9",
-    theme_color: "#1d4ed8",
+    theme_color: "#f6f7f9",
     categories: ["productivity", "business"],
     // Fase 7: aparece en "Compartir" de Android (WhatsApp y otras apps).
     share_target: { action: "/compartir", method: "GET", params: { title: "title", text: "text", url: "url" } },

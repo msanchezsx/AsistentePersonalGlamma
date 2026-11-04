@@ -4,6 +4,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar]
 
+### Cambiado (pantalla de arranque)
+- Icono sin el cuadro azul: la caja va sobre fondo transparente (`any`) o claro `#f6f7f9` (`maskable`), y `theme_color` pasa a `#f6f7f9`. Así la pantalla de arranque de Android muestra solo la caja sobre el mismo fondo que la animación de la caja girando. Service worker `v7`. Requiere reinstalar la app para que Android tome el icono nuevo.
+
 ### Agregado (Fase 4 — Avisos con la app cerrada)
 - Web Push: `/api/cron/avisos` (protegido con `CRON_SECRET`, comparación en tiempo constante) envía recordatorios y avisos críticos que llegaron en los últimos 30 min. Se registra cada envío en `notifications` con llave única antes de enviar: no hay duplicados aunque el programador se repita. Suscripciones vencidas se borran.
 - El service worker (`v6`) muestra el aviso; los críticos se quedan en pantalla y vibran.
