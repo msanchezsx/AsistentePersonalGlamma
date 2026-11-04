@@ -7,9 +7,9 @@
  * Fase 4: al tocar un aviso de recordatorio se abre (o enfoca) la app en su pantalla.
  * Fase 4: avisos con la app cerrada (Web Push enviado por /api/cron/avisos).
  */
-const VERSION = "v8";
+const VERSION = "v9";
 const STATIC_CACHE = `ae-static-${VERSION}`;
-const PRECACHE = ["/offline", "/icons/caja-192.png", "/icons/caja-512.png"];
+const PRECACHE = ["/offline", "/icons/caja-3d-192.png", "/icons/caja-3d-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(STATIC_CACHE).then((c) => c.addAll(PRECACHE)));
@@ -84,8 +84,8 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(String(data.title || "Asistente").slice(0, 200), {
       body: String(data.body || "").slice(0, 500),
       tag: String(data.tag || "aviso").slice(0, 200),
-      icon: "/icons/caja-192.png",
-      badge: "/icons/caja-192.png",
+      icon: "/icons/caja-3d-192.png",
+      badge: "/icons/caja-3d-192.png",
       data: { url },
       requireInteraction: Boolean(data.critical),
       vibrate: data.critical ? [300, 150, 300, 150, 300] : [200],

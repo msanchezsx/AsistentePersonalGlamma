@@ -44,15 +44,15 @@ export async function showSystemNotification(
       await reg.showNotification(title, {
         body,
         tag,
-        icon: "/icons/caja-192.png",
-        badge: "/icons/caja-192.png",
+        icon: "/icons/caja-3d-192.png",
+        badge: "/icons/caja-3d-192.png",
         data: { url },
         // Los críticos se quedan en pantalla hasta que el usuario los atiende.
         requireInteraction: Boolean(opts.critical),
       });
       return true;
     }
-    new Notification(title, { body, tag, icon: "/icons/caja-192.png" });
+    new Notification(title, { body, tag, icon: "/icons/caja-3d-192.png" });
     return true;
   } catch {
     return false;

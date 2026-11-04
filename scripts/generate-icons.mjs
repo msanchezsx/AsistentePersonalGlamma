@@ -18,14 +18,11 @@ const browser = await chromium.launch();
 // box = lado del lienzo en px CSS (= dp en el teléfono). maskable: fondo a sangre y
 // la caja dentro de la zona segura (círculo del 80 %).
 for (const [file, size, box, maskable] of [
-  ["caja-192.png", 192, 165, false],
-  ["caja-512.png", 512, 165, false],
-  ["caja-maskable-512.png", 512, 205, true],
-  // Los del manifest son de 144 px (el mínimo para instalar): Chrome no pone imagen
-  // en su pantalla de arranque si el icono es menor a 48 dp de la pantalla (~150 px
-  // en celulares de alta densidad), así solo se ve la caja girando de la app.
-  ["caja-144.png", 144, 165, false],
-  ["caja-maskable-144.png", 144, 205, true],
+  // El nombre lleva versión (-3d): el teléfono y el service worker guardaban los
+  // iconos viejos con el mismo nombre y Android seguía mostrando la caja plana.
+  ["caja-3d-192.png", 192, 165, false],
+  ["caja-3d-512.png", 512, 165, false],
+  ["caja-3d-maskable-512.png", 512, 205, true],
 ]) {
   const page = await browser.newPage({ viewport: { width: box, height: box }, deviceScaleFactor: size / box });
   await page.setContent(`<style>${cubeCss}
