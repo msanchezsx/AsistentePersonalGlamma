@@ -8,6 +8,8 @@ import { createClient } from "@/lib/supabase/server";
 import { DeviceActions } from "./device-actions";
 import { NameForm } from "./name-form";
 import { NotificationsSetting } from "./notifications-setting";
+import { pushConfig, pushConfigIssues } from "@/lib/push";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Configuración" };
 export const dynamic = "force-dynamic";
@@ -73,7 +75,12 @@ export default async function ConfigPage() {
         </Card>
 
         <Card title="Avisos">
-          <NotificationsSetting />
+          <NotificationsSetting vapidKey={pushConfig()?.publicKey ?? null} />
+          {pushConfigIssues().length ? (
+            <Link href="/configuracion/servidor-avisos" className="mt-3 inline-block text-sm font-medium text-accent">
+              Configurar avisos con la app cerrada
+            </Link>
+          ) : null}
         </Card>
 
         <Card title="Jornada laboral">
@@ -85,9 +92,6 @@ export default async function ConfigPage() {
           ) : (
             <EmptyState>Sin datos de jornada todavía.</EmptyState>
           )}
-          <p className="mt-2 text-xs text-muted">
-            La edición de jornada y notificaciones se habilita en las Fases 1 y 4.
-          </p>
         </Card>
 
         <Card title={`Dispositivos autorizados${prefs ? ` (máximo ${prefs.max_devices})` : ""}`}>

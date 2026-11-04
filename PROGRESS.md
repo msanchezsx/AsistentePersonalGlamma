@@ -6,7 +6,7 @@
 | 1. Agenda inteligente | 🟢 Completa (1.6 pendiente de prueba del usuario) |
 | 2. Inteligencia artificial | 🟡 Publicada y migración aplicada; pendiente la clave de Claude (de pago, el usuario la pospuso) |
 | 3. Outlook | ⏸ Pospuesta: falta registrar la app en Azure (guía en docs/GUIA-OUTLOOK-AZURE.md) |
-| 4. Automatizaciones | 🟡 Publicada sin servicios externos; falta prueba del usuario. Push con app cerrada y n8n pendientes |
+| 4. Automatizaciones | 🟡 Publicada; avisos con la app cerrada listos en código (falta configurar claves y programador). n8n pendiente |
 | 5. Podcast | 🟡 Publicada con voz del equipo; falta prueba del usuario |
 | 6. Inteligencia y productividad | 🟡 Publicada; falta prueba del usuario |
 | 7. WhatsApp | 🟡 Publicada (compartir); falta prueba del usuario |

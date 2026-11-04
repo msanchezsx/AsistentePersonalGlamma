@@ -4,7 +4,8 @@ import { getPublicEnv } from "@/lib/env";
 import { DEVICE_COOKIE, hashDeviceToken, isValidDeviceToken, type DeviceStatus } from "@/lib/device";
 
 /** Rutas accesibles sin sesión. */
-const PUBLIC_PATHS = ["/login", "/auth/callback", "/offline", "/api/health"];
+// /api/cron: lo llama el programador externo; se protege con CRON_SECRET.
+const PUBLIC_PATHS = ["/login", "/auth/callback", "/offline", "/api/health", "/api/cron"];
 /** Rutas accesibles con sesión pero sin dispositivo aprobado. */
 const DEVICE_PATHS = ["/dispositivo", "/auth/signout"];
 

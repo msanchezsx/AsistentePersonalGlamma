@@ -4,6 +4,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar]
 
+### Agregado (Fase 4 — Avisos con la app cerrada)
+- Web Push: `/api/cron/avisos` (protegido con `CRON_SECRET`, comparación en tiempo constante) envía recordatorios y avisos críticos que llegaron en los últimos 30 min. Se registra cada envío en `notifications` con llave única antes de enviar: no hay duplicados aunque el programador se repita. Suscripciones vencidas se borran.
+- El service worker (`v6`) muestra el aviso; los críticos se quedan en pantalla y vibran.
+- Configuración → Avisos registra el dispositivo (solo dispositivos autorizados; se escribe con la clave de servicio tras verificar sesión y dispositivo).
+- Asistente de configuración en `/configuracion/servidor-avisos`: genera las llaves VAPID y el secreto en el servidor (no se guardan) para copiarlos a Vercel, y explica el programador gratuito (cron-job.org cada 5 min).
+- Nueva dependencia: `web-push` (aprobada por el usuario el 2026-11-04). Sin migración.
+
 ### Agregado (avisos críticos, pedido del usuario)
 - **Aviso a pantalla completa** para tareas críticas (prioridad "Crítica" o urgente + importante) y reuniones marcadas como **Reunión crítica**: aparece al llegar su recordatorio, su hora límite (las de todo el día a las 9:00) o 10 minutos antes de la reunión. Botones **Enterado**, **Ya lo realicé** (termina la tarea / marca la reunión como realizada), **Cancelar** (con confirmación) y **Recordar en 10 min**. También lanza un aviso del sistema que no se quita solo y vibra.
 - Migración `20261104000005_meetings_critical.sql`: `meetings.is_critical`. El código tolera que aún no esté aplicada.

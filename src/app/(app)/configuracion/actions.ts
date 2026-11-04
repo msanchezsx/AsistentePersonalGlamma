@@ -74,3 +74,57 @@ export async function updatePreferredName(_prev: NameActionState, formData: Form
   revalidatePath("/", "layout");
   return { ok: true, message: "Nombre guardado." };
 }
+
+const subscriptionSchema = z.object({
+  endpoint: z.string().url().startsWith("https://").max(2000),
+  keys: z.object({ p256dh: z.string().min(10).max(200), auth: z.string().min(8).max(100) }),
+});
+
+/**
+ * Guarda la suscripción de avisos de ESTE dispositivo (ya autorizado). La
+ * tabla no admite escritura directa del usuario: se verifica sesión y
+ * dispositivo aquí y se escribe con la clave de servicio.
+ */
+export async function savePushSubscription(json: string): Promise<{ ok: boolean; message?: string }> {
+  let parsed;
+  try {
+    parsed = subscriptionSchema.safeParse(JSON.parse(json));
+  } catch {
+    return { ok: false, message: "Suscripción inválida." };
+  }
+  if (!parsed.success) return { ok: false, message: "Suscripción inválida." };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, message: "Inicia sesión de nuevo." };
+  let hash: string;
+  try {
+    hash = await callerHash();
+  } catch {
+    return { ok: false, message: "Dispositivo no identificado." };
+  }
+  const { data: device } = await supabase
+    .from("devices")
+    .select("id, status")
+    .eq("token_hash", hash)
+    .maybeSingle();
+  if (!device || device.status !== "active") return { ok: false, message: "Este dispositivo no está autorizado." };
+
+  const { createAdminClient } = await import("@/lib/push");
+  const admin = createAdminClient();
+  if (!admin) return { ok: false, message: "El servidor de avisos aún no está configurado." };
+  // Una suscripción por dispositivo: se reemplaza la anterior.
+  await admin.from("push_subscriptions").delete().eq("device_id", device.id).neq("endpoint", parsed.data.endpoint);
+  const { error } = await admin.from("push_subscriptions").upsert(
+    {
+      user_id: user.id,
+      device_id: device.id,
+      endpoint: parsed.data.endpoint,
+      p256dh: parsed.data.keys.p256dh,
+      auth_key: parsed.data.keys.auth,
+    },
+    { onConflict: "endpoint" },
+  );
+  return error ? { ok: false, message: "No se pudo registrar este dispositivo." } : { ok: true };
+}
