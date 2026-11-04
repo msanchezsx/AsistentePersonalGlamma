@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { LiveClock } from "@/components/live-clock";
 import { GlamaLogo } from "@/components/glama-logo";
-import { Card, EmptyState, PhaseBadge } from "@/components/ui";
+import { Card, EmptyState } from "@/components/ui";
 import { greetingFor } from "@/lib/datetime";
 import { getViewer } from "@/lib/session";
 import { groupTasks, type Task } from "@/lib/tasks/model";
@@ -13,12 +13,11 @@ import { isActiveMeeting, type Meeting } from "@/lib/meetings/model";
 import { listMeetings } from "@/lib/meetings/queries";
 import { loadAlerts, loadBriefing } from "@/lib/briefing-server";
 import { dismissReminder } from "./resumen/actions";
+import { createClient } from "@/lib/supabase/server";
+import { FOLLOW_UP_SELECT, groupFollowUps, type FollowUp } from "@/lib/projects";
+import { FollowUpItem } from "./proyectos/parts";
 
 export const dynamic = "force-dynamic";
-
-const SECTIONS = [
-  { title: "Seguimientos", phase: 1, text: "Seguimientos y compromisos abiertos con clientes y colaboradores." },
-];
 
 export default async function HomePage() {
   const viewer = await getViewer();
@@ -55,15 +54,7 @@ export default async function HomePage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <ExecutiveSummary />
         <Alerts />
-        {SECTIONS.map((s) => (
-          <Card key={s.title} className="lg:col-span-2">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">{s.title}</h2>
-              <PhaseBadge phase={s.phase} />
-            </div>
-            <EmptyState>{s.text}</EmptyState>
-          </Card>
-        ))}
+        <FollowUpsCard timeZone={viewer.timezone} preview={viewer.preview} now={now} />
       </div>
     </div>
   );
@@ -249,6 +240,45 @@ async function Alerts() {
             </li>
           ))}
         </ul>
+      )}
+    </Card>
+  );
+}
+
+/** Compromisos abiertos: lo que debo y lo que me deben (máximo 5). */
+async function FollowUpsCard({ preview, timeZone, now }: { preview: boolean; timeZone: string; now: Date }) {
+  let items: FollowUp[] = [];
+  if (!preview) {
+    const supabase = await createClient();
+    const { data } = await supabase.from("follow_ups").select(FOLLOW_UP_SELECT).eq("status", "open").limit(100);
+    items = (data as unknown as FollowUp[] | null) ?? [];
+  }
+  const g = groupFollowUps(items, now);
+  const list = [...g.mine, ...g.theirs]
+    .sort((a, b) => (a.due_at ?? "9999").localeCompare(b.due_at ?? "9999"))
+    .slice(0, 5);
+  return (
+    <Card className="lg:col-span-2">
+      <div className="mb-1 flex items-center justify-between">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Seguimientos</h2>
+        <Link href="/proyectos" className="text-sm font-medium text-accent">
+          Ver todos
+        </Link>
+      </div>
+      {list.length === 0 ? (
+        <EmptyState>Sin compromisos abiertos.</EmptyState>
+      ) : (
+        <>
+          <p className="text-xs text-muted">
+            Yo debo {g.mine.length} · Me deben {g.theirs.length}
+            {g.overdue ? ` · ${g.overdue} vencido${g.overdue === 1 ? "" : "s"}` : ""}
+          </p>
+          <ul className="divide-y divide-border">
+            {list.map((f) => (
+              <FollowUpItem key={f.id} f={f} now={now} timeZone={timeZone} />
+            ))}
+          </ul>
+        </>
       )}
     </Card>
   );

@@ -10,5 +10,5 @@ export function readVersion(formData: FormData): string | null {
 
 /** Pantallas con formularios: no se refrescan solas para no interrumpir lo que escribes. */
 export function isEditing(pathname: string): boolean {
-  return /\/(nueva|capturar)$/.test(pathname) || /^\/(tareas|agenda|dashboard\/incidencias)\/[0-9a-f-]{36}$/.test(pathname);
+  return /\/(nueva|capturar)$/.test(pathname) || /^\/(tareas|agenda|dashboard\/incidencias|proyectos|proyectos\/clientes)\/[0-9a-f-]{36}$/.test(pathname);
 }

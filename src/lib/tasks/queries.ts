@@ -53,3 +53,12 @@ export async function listRelationOptions(): Promise<{ projects: Option[]; clien
     clients: ((c.data as { id: string; name: string }[] | null) ?? []).map((x) => ({ id: x.id, label: x.name })),
   };
 }
+
+export async function listContactOptions(): Promise<Option[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("contacts").select("id, full_name, client:clients(name)").order("full_name").limit(300);
+  return ((data as unknown as { id: string; full_name: string; client: { name: string } | null }[] | null) ?? []).map((c) => ({
+    id: c.id,
+    label: c.client ? `${c.full_name} (${c.client.name})` : c.full_name,
+  }));
+}

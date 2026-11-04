@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ## [Sin publicar]
 
+### Agregado (Fase 1 — Proyectos, clientes y seguimientos)
+- **Proyectos** (`/proyectos`) con tres secciones:
+  - **Seguimientos:** "Yo debo" y "Me deben", con fecha compromiso, persona (existente o nueva), proyecto y cliente; se marcan como cumplidos con un toque. Los vencidos van primero.
+  - **Proyectos / pedidos:** nombre, número de pedido, cliente, fechas y estado. El detalle muestra tareas abiertas, seguimientos y reuniones del proyecto.
+  - **Clientes:** con contactos (puesto, teléfono y correo con enlace directo) y sus proyectos.
+- Tarjeta **Seguimientos** en Inicio. Los proyectos y clientes aparecen al crear tareas y reuniones.
+- Sin migración (tablas de la Fase 0). Edición con bloqueo optimista.
+
 ### Corregido
 - El logo de Glama salía roto en la pantalla de inicio de sesión: el middleware redirigía `/brand/*` al login para usuarios sin sesión. Ahora `/brand/` se sirve como archivo estático (verificado: antes 307, ahora 200).
 - Al pedir el enlace de acceso, el límite de envío de correos de Supabase se mostraba como un error genérico. Ahora se explica (esperar ~1 hora, o 1 minuto entre solicitudes).

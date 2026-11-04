@@ -71,6 +71,7 @@ Guía paso a paso para el usuario: [docs/GUIA-SUPABASE-VERCEL.md](docs/GUIA-SUPA
 | 1.3 | Recurrencias | ✅ Probada por el usuario (2026-11-03) | 56 pruebas unitarias, 51 comprobaciones SQL, build OK |
 | 1.4 | Vistas diaria y semanal | ✅ Probada por el usuario (2026-11-03) | 65 pruebas unitarias, 51 comprobaciones SQL, build OK. Sin migración |
 | 1.5 | Registro por texto y voz | ✅ Voz con el micrófono del teclado (decisión del usuario 2026-11-03: el dictado de Chrome no funciona en su tablet) | 76 pruebas unitarias, build OK |
+| 1.7 | Proyectos, clientes y seguimientos | 🟡 Publicada, falta prueba del usuario | 110 pruebas unitarias, build OK. Sin migración |
 | 1.6 | Sincronización entre dispositivos | 🟡 Publicada, falta prueba del usuario | 78 pruebas unitarias, 53 comprobaciones SQL, build OK. Sin migración |
 
 Nota: no hay acceso de red desde el entorno de desarrollo a Supabase, por lo que las consultas reales se validan en producción por el usuario.
